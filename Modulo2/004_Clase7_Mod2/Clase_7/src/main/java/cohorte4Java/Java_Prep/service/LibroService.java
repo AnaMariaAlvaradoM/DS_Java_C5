@@ -2,6 +2,7 @@ package cohorte4Java.Java_Prep.service;
 
 import cohorte4Java.Java_Prep.model.Libro;
 import cohorte4Java.Java_Prep.repository.LibroRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +17,11 @@ import java.util.stream.Collectors;
 // pero le pide al almacén (LibroRepository) que busque o guarde los libros físicamente.
 
 @Service
-public class LibroService {
+public class LibroService implements ILibroService{
 
     // LibroService necesita LibroRepository para acceder a los datos.
     // final = esta referencia no cambia después de que Spring la inyecta.
+    @Autowired
     private final LibroRepository libroRepository;
 
     // Inyección por constructor — Spring detecta el parámetro y busca automáticamente
@@ -105,8 +107,8 @@ public class LibroService {
         return libroRepository.findAll().size();
     }
 
-
-    public Libro actualizar(Long id, Libro nuevo) {
+    @Override
+    public Libro actualizarLibro(Long id, Libro nuevo) {
         Optional<Libro> encontrado =
                 libroRepository.findById(id);
         if (encontrado.isPresent()) {

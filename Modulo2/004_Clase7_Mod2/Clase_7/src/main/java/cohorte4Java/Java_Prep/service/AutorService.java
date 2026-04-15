@@ -2,6 +2,7 @@ package cohorte4Java.Java_Prep.service;
 
 import cohorte4Java.Java_Prep.model.Autor;
 import cohorte4Java.Java_Prep.repository.AutorRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,8 +10,9 @@ import java.util.Optional;
 
 @Service
 public class AutorService implements IAutorService{
-
+    @Autowired
     private final AutorRepository autorRepository;
+
 public AutorService(AutorRepository autorRepository) {
             this.autorRepository = autorRepository;
         }
@@ -24,6 +26,7 @@ public AutorService(AutorRepository autorRepository) {
         public Optional<Autor> buscarPorId(Long id) {
             return autorRepository.findById(id);
         }
+
     @Override
     public Autor agregar(Autor autor) {
            if (autor.getNombre() == null || autor.getNombre().trim().isEmpty()) {

@@ -2,6 +2,7 @@ package cohorte4Java.Java_Prep.controller;
 
 import cohorte4Java.Java_Prep.model.Libro;
 import cohorte4Java.Java_Prep.service.ILibroService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

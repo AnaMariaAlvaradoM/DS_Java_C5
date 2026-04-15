@@ -1,6 +1,7 @@
 package cohorte4Java.Java_Prep.model;
 
 
+import jakarta.validation.constraints.Min;
 
 public class Libro {
 
@@ -8,6 +9,8 @@ public class Libro {
     private String titulo;
     private String autor;
     private String isbn;
+
+    @Min(value=0,message = "El precio no puede ser negativo")
     private Double precio;
 
     public Libro() {
