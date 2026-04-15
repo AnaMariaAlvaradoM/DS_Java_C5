@@ -1,24 +1,13 @@
 package cohorte4Java.Java_Prep.controller;
 
 import cohorte4Java.Java_Prep.model.Libro;
-import cohorte4Java.Java_Prep.service.LibroService;
-// ↑ Importamos LibroService (clase concreta) — esto es lo que vamos a cambiar en clase
-//   cuando apliquemos el principio DIP creando ILibroService
+import cohorte4Java.Java_Prep.service.ILibroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-// @RestController le dice a Spring que esta clase atiende peticiones HTTP
-//                 y que cada método retorna datos (no vistas HTML).
-// @RequestMapping("/api/libros") define el prefijo de todas las rutas de esta clase.
-// Responsabilidad única: recibir peticiones, llamar al service y devolver la respuesta HTTP.
-// No valida datos de negocio — eso es responsabilidad de LibroService.
-// No accede a datos — eso es responsabilidad de LibroRepository.
-// Analogía: la recepción de la librería — atiende al cliente y le pasa el pedido
-//           al empleado (service), pero no procesa nada por sí misma.
 
 @RestController
 @RequestMapping("/api/libros")
@@ -28,7 +17,7 @@ public class LibroController {
     // Durante el Bloque 4 vamos a reemplazar esto por ILibroService (interfaz)
     // aplicando el principio DIP: depender de abstracciones, no de implementaciones.
     @Autowired
-    private LibroService libroService;
+    private ILibroService libroService;
 
     // GET /api/libros
     // Retorna 200 OK con la lista de libros, o 204 No Content si no hay ninguno.
@@ -146,4 +135,18 @@ public class LibroController {
                     .body("Error al contar los libros"); // 500
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Libro> actualizarLibro(
+            @PathVariable Long id,
+            @Valid @RequestBody Libro libro) {
+
+        Libro actualizado = libroService.actualizarLibro(id, libro);
+        if (actualizado == null) {
+            return ResponseEntity
+                    .notFound().build(); // 404
+        }
+        return ResponseEntity.ok(actualizado); // 200
+    }
+
 }

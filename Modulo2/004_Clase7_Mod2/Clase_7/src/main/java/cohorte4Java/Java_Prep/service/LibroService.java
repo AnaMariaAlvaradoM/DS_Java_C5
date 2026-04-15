@@ -104,4 +104,19 @@ public class LibroService {
     public int contarLibros() {
         return libroRepository.findAll().size();
     }
+
+
+    public Libro actualizar(Long id, Libro nuevo) {
+        Optional<Libro> encontrado =
+                libroRepository.findById(id);
+        if (encontrado.isPresent()) {
+            Libro existente = encontrado.get();
+            existente.setTitulo(nuevo.getTitulo());
+            existente.setAutor(nuevo.getAutor());
+            existente.setIsbn(nuevo.getIsbn());
+            existente.setPrecio(nuevo.getPrecio());
+            return existente;
+        }
+        return null; // controller → 404
+    }
 }

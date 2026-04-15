@@ -36,4 +36,6 @@ public interface ILibroService {
 
     // Retorna el total de libros registrados
     int contarLibros();
+
+    Libro actualizarLibro(Long id, Libro libroNuevo);
 }
