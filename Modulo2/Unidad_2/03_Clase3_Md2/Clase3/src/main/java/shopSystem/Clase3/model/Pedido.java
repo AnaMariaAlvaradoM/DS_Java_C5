@@ -30,12 +30,8 @@ public class Pedido {
     private String estado;
 
     @ManyToOne(fetch = FetchType.LAZY)
-
     @JoinColumn(name = "cliente_id", nullable = false)
-
-
     @JsonIgnore
-
     private Cliente cliente;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
