@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
     List<Producto>findByNombre(String nombre);
-    List<Producto>findByStockDisponible(Integer stock);
+    List<Producto>findByStock(Integer stock);
 }

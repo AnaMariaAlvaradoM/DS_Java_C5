@@ -8,57 +8,53 @@ import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.List;
-
 @Entity
 @Table(name = "clientes")
 public class Cliente {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_Cliente;
+    private Long id;
+
     @NotBlank(message = "El nombre es obligatorio")
-    @Size(min= 2, max = 100, message = "El nombre debe estar en 2 y 100 carácteres")
+    @Size(min = 2, max = 100, message = "El nombre debe estar entre 2 y 100 caracteres")
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
     @NotBlank(message = "El email es necesario")
-    @Email(message = "No tiene formato valido")
+    @Email(
+            message = "No tiene formato válido",
+            regexp = "^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$"
+    )
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(
+            mappedBy = "cliente",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
+    )
     @JsonIgnore
     private List<Pedido> pedidos = new ArrayList<>();
 
-    public Cliente() {
-    }
+    // ✅ Requerido por JPA
+    public Cliente() {}
 
-    public Cliente(Long id_Cliente, String nombre, String email) {
-        this.id_Cliente = id_Cliente;
+    // ✅ Sin id — la BD lo genera
+    public Cliente(String nombre, String email) {
         this.nombre = nombre;
         this.email = email;
     }
 
-    public Long getId_Cliente() {
-        return id_Cliente;
-    }
+    public Long getId() { return id; }
+    // ❌ setId() eliminado
 
-    public void setId_Cliente(Long id_Cliente) {
-        this.id_Cliente = id_Cliente;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public @NotBlank(message = "El nombre es obligatorio") @Size(min = 2, max = 100, message = "El nombre debe estar en 2 y 100 carácteres") String getNombre() {
-        return nombre;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setNombre(@NotBlank(message = "El nombre es obligatorio") @Size(min = 2, max = 100, message = "El nombre debe estar en 2 y 100 carácteres") String nombre) {
-        this.nombre = nombre;
-    }
-
-    public @NotBlank(message = "El email es necesario") @Email(message = "No tiene formato valido") String getEmail() {
-        return email;
-    }
-
-    public void setEmail(@NotBlank(message = "El email es necesario") @Email(message = "No tiene formato valido") String email) {
-        this.email = email;
-    }
+    public List<Pedido> getPedidos() { return pedidos; }
 }

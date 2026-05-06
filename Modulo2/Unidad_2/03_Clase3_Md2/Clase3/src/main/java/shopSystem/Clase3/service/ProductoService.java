@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProductoService {
+public class ProductoService implements IProductoService{
 
     private final ProductoRepository productoRepository;
 
@@ -25,7 +25,7 @@ public class ProductoService {
     }
 
     public List<Producto> listarDisponibles() {
-        return productoRepository.findByStockDisponible(0);
+        return productoRepository.findByStock(0);
     }
 
     public Producto guardar(Producto producto) {

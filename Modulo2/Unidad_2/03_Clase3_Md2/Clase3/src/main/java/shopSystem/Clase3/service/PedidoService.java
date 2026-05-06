@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PedidoService {
+public class PedidoService implements IPedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ClienteRepository clienteRepository;
-    private final ProductoRepository productoRepository;
+    //private final ProductoRepository productoRepository;
 
     public PedidoService(
             PedidoRepository pedidoRepository,
@@ -24,7 +24,7 @@ public class PedidoService {
     ) {
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
-        this.productoRepository = productoRepository;
+        //this.productoRepository = productoRepository;
     }
 
     public List<Pedido> listarTodos() {
