@@ -58,4 +58,13 @@ public class ClienteController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<Cliente> buscarPorEmail(@RequestParam String email) {
+        return clienteService.buscarPorEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
 }

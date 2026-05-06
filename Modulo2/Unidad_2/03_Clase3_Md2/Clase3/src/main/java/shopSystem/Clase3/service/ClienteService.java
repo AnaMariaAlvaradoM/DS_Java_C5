@@ -23,6 +23,11 @@ public class ClienteService implements IclienteService {
         return clienteRepository.findById(id);
     }
 
+    @Override
+    public Optional<Cliente> buscarPorEmail(String email) {
+        return clienteRepository.findByEmail(email);
+    }
+
     public Cliente guardar(Cliente cliente) {
         Optional<Cliente> existente = clienteRepository.findByEmail(cliente.getEmail());
         if (existente.isPresent()) {

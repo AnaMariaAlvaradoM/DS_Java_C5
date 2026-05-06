@@ -9,7 +9,10 @@ public interface IProductoService {
     List<Producto> listarTodos();
     Optional<Producto> buscarPorId(Long id);
     List<Producto> listarDisponibles();
+    List<Producto> obtenerProductosMenoresDe(Double precio);
     Producto guardar(Producto producto);
     Optional<Producto> actualizar(Long id, Producto datosNuevos);
     boolean eliminar(Long id);
+    List<Object[]> obtenerProductosMasVendidos();
+
 }

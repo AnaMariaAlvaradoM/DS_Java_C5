@@ -39,6 +39,12 @@ public class PedidoService implements IPedidoService {
         return pedidoRepository.findByClienteId(clienteId);
     }
 
+    @Override
+    public List<Pedido> obtenerPedidosUltimoMes() {
+        LocalDateTime fechaLimite = LocalDateTime.now().minusDays(30);
+        return pedidoRepository.findPedidosDesde(fechaLimite);
+    }
+
     public Pedido crearPedido(Long clienteId) {
 
         Cliente cliente = clienteRepository.findById(clienteId)

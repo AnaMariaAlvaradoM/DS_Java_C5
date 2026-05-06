@@ -56,4 +56,15 @@ public class ProductoController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/menores-de")
+    public ResponseEntity<List<Producto>> menoresDe(@RequestParam Double precio) {
+        return ResponseEntity.ok(productoService.obtenerProductosMenoresDe(precio));
+    }
+
+    @GetMapping("/mas-vendidos")
+   public ResponseEntity<List<Object[]>> masVendidos() {
+        return ResponseEntity.ok(productoService.obtenerProductosMasVendidos());
+    }
+
 }

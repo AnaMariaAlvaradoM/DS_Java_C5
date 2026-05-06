@@ -10,6 +10,7 @@ public interface IPedidoService {
     List<Pedido> listarTodos();
     Optional<Pedido> buscarPorId(Long id);
     List<Pedido> pedidosPorCliente(Long clienteId);
+    List<Pedido> obtenerPedidosUltimoMes();
     Pedido crearPedido(Long clienteId);
     Optional<Pedido> actualizarEstado(Long id, String nuevoEstado);
     boolean eliminar(Long id);

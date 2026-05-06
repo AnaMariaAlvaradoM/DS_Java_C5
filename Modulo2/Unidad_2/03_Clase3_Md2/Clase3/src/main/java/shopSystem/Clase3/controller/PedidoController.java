@@ -61,4 +61,10 @@ public class PedidoController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    // GET /api/pedidos/ultimo-mes
+    @GetMapping("/ultimo-mes")
+    public ResponseEntity<List<Pedido>> pedidosUltimoMes() {
+        return ResponseEntity.ok(pedidoService.obtenerPedidosUltimoMes());
+    }
 }

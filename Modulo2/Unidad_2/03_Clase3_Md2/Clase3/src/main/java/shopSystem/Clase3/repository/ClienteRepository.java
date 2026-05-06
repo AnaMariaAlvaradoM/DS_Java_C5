@@ -8,7 +8,6 @@ import shopSystem.Clase3.model.Cliente;
 import java.util.Optional;
 
 @Repository
-
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     Optional<Cliente> findByEmail(String email);
 }
