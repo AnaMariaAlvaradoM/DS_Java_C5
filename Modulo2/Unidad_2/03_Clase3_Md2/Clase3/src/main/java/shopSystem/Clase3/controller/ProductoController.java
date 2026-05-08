@@ -75,6 +75,16 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.buscarConFiltros(nombre, PrecioMin, PrecioMax));
    }
 
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<String> actualizarStock(@PathVariable Long id, @RequestParam Integer cantidad) {
+            boolean actualizado = productoService.actualizarStock(id, cantidad);
+            if (actualizado) {
+                return ResponseEntity.ok("Stock actualizado correctamente.");
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+    }
+
 
 
 

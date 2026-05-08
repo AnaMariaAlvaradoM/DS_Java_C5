@@ -15,5 +15,6 @@ public interface IProductoService {
     boolean eliminar(Long id);
     List<Object[]> obtenerProductosMasVendidos();
     List<Producto> buscarConFiltros(String nombre, Double precioMin, Double precioMax);
+    boolean actualizarStock(Long id, Integer nuevoStock);
 
 }

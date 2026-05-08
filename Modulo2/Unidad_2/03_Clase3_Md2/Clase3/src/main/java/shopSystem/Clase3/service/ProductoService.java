@@ -66,4 +66,10 @@ public class ProductoService implements IProductoService{
     public List<Producto> buscarConFiltros(String nombre, Double precioMin, Double precioMax) {
         return productoRepository.buscarConFiltros(nombre, precioMin, precioMax);
     }
+
+    @Override
+    public boolean actualizarStock(Long id, Integer nuevoStock) {
+       int filasAfectadas = productoRepository.actualizarStock(id, nuevoStock);
+        return filasAfectadas > 0;
+    }
 }
