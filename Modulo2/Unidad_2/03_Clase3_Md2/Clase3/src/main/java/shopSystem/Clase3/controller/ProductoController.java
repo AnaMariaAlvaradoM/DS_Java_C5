@@ -65,6 +65,32 @@ public class ProductoController {
     @GetMapping("/mas-vendidos")
    public ResponseEntity<List<Object[]>> masVendidos() {
         return ResponseEntity.ok(productoService.obtenerProductosMasVendidos());
-    }
+   }
+
+   @GetMapping("/filtrar")
+    public ResponseEntity<List<Producto>> filtrar(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) Double PrecioMin,
+            @RequestParam(required = false) Double PrecioMax){
+        return ResponseEntity.ok(productoService.buscarConFiltros(nombre, PrecioMin, PrecioMax));
+   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

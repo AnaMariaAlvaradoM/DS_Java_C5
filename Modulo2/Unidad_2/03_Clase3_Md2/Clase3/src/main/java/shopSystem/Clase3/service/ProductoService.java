@@ -61,4 +61,9 @@ public class ProductoService implements IProductoService{
     public List<Object[]> obtenerProductosMasVendidos() {
         return detallePedidoRepository.findProductosMasVendidos();
     }
+
+    @Override
+    public List<Producto> buscarConFiltros(String nombre, Double precioMin, Double precioMax) {
+        return productoRepository.buscarConFiltros(nombre, precioMin, precioMax);
+    }
 }
