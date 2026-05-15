@@ -13,4 +13,7 @@ public interface IUsuarioService {
     UsuarioResponseDTO consultarPorId(String id);
 
     void eliminar(String id);
+
+    UsuarioResponseDTO actualizar(String id, UsuarioRequestDTO dto);
+
 }

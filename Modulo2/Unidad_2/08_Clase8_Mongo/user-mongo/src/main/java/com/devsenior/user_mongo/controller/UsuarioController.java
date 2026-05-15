@@ -27,7 +27,7 @@ public class UsuarioController {
     }
 
     @GetMapping
-   public ResponseEntity<List<UsuarioResponseDTO>> consultarTodos() {
+    public ResponseEntity<List<UsuarioResponseDTO>> consultarTodos() {
         return ResponseEntity.ok(usuarioService.consultarTodos());
     }
 
@@ -37,7 +37,15 @@ public class UsuarioController {
 
         return ResponseEntity.ok(usuarioService.consultarPorId(id));
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> actualizar(
+            @PathVariable String id,
+            @Valid @RequestBody UsuarioRequestDTO dto) {
 
+        UsuarioResponseDTO respuesta = usuarioService.actualizar(id, dto);
+        // HTTP 200 OK: la actualización fue exitosa y devolvemos el recurso actualizado
+        return ResponseEntity.ok(respuesta);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(

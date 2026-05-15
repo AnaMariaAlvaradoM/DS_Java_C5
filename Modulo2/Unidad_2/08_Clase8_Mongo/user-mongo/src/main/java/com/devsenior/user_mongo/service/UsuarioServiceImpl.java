@@ -86,6 +86,35 @@ public class UsuarioServiceImpl implements IUsuarioService {
         log.info("Usuario con id {} eliminado exitosamente", id);
     }
 
+    @Override
+    public UsuarioResponseDTO actualizar(String id, UsuarioRequestDTO dto) {
+        // 1. Buscar el usuario existente. Si no existe, lanza la excepción que ya tenemos.
+        Usuario usuarioExistente = usuarioRepository.findById(id)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(
+                        "No se encontró un usuario con el id: " + id));
+
+        // 2. Si el email cambió, verificar que el nuevo email no esté en uso por otro usuario.
+        if (!usuarioExistente.getEmail().equals(dto.getEmail())) {
+            if (usuarioRepository.existsByEmail(dto.getEmail())) {
+                throw new EmailDuplicadoException(
+                        "Ya existe un usuario registrado con el email: " + dto.getEmail());
+            }
+        }
+
+        // 3. Actualizar los campos con los datos del DTO.
+        //    El id y el campo 'activo' no se tocan — vienen del objeto ya guardado.
+        usuarioExistente.setNombre(dto.getNombre());
+        usuarioExistente.setEmail(dto.getEmail());
+        usuarioExistente.setTelefono(dto.getTelefono());
+
+        // 4. Guardar. Como el objeto ya tiene un id, MongoDB actualiza el documento existente.
+        //    No crea uno nuevo. Es el mismo comportamiento que en JPA.
+        Usuario usuarioActualizado = usuarioRepository.save(usuarioExistente);
+
+        // 5. Retornar el DTO de respuesta.
+        return mapearAResponseDTO(usuarioActualizado);
+    }
+
     private UsuarioResponseDTO mapearAResponseDTO(Usuario usuario) {
         return UsuarioResponseDTO.builder()
                 .id(usuario.getId())
