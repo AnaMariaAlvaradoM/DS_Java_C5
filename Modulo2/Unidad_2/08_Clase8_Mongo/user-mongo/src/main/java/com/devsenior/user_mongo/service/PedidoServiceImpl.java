@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,89 +22,99 @@ public class PedidoServiceImpl implements IPedidoService {
     private final IUsuarioRepository usuarioRepository;
 
     @Override
-    public PedidoResponseDTO crearPedido(PedidoRequestDTO request) {
-        Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException(
-                        "Usuario no encontrado con id: " + request.getUsuarioId()));
+    public PedidoResponseDTO crear(PedidoRequestDTO dto) {
 
-        Pedido pedido = Pedido.builder()
-                .descripcion(request.getDescripcion())
-                .total(request.getTotal())
-                .direccionEntrega(request.getDireccionEntrega())
-                .usuarioId(request.getUsuarioId())
-                .estado("PENDIENTE")
+        // 1. Buscar el usuario. Si no existe, lanza excepción controlada.
+        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+                .orElseThrow(() -> new UsuarioNoEncontradoException(
+                        "No se encontró un usuario con el id: " + dto.getUsuarioId()));
+
+        // 2. Construir el pedido.
+        //    - id: lo genera MongoDB (no lo asignamos)
+        //    - fechaCreacion: la asignamos nosotros con LocalDateTime.now()
+        //    - estado: siempre inicia en PENDIENTE
+        //    - direccionEntrega: viene del DTO tal como la envió el cliente
+        //    - usuario: referencia al documento Usuario encontrado (@DBRef)
+        Pedido nuevoPedido = Pedido.builder()
+                .descripcion(dto.getDescripcion())
+                .total(dto.getTotal())
                 .fechaCreacion(LocalDateTime.now())
+                .estado("PENDIENTE")
+                .direccionEntrega(dto.getDireccionEntrega())
+                .usuario(usuario)
                 .build();
 
-        Pedido guardado = pedidoRepository.save(pedido);
-        return toResponse(guardado, usuario);
-    }
+        // 3. Guardar. Spring Data + @DBRef guarda la referencia al usuario automáticamente.
+        Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
 
-    @Override
-    public PedidoResponseDTO buscarPorId(String id) {
-        Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));
-
-        Usuario usuario = usuarioRepository.findById(pedido.getUsuarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException(
-                        "Usuario no encontrado con id: " + pedido.getUsuarioId()));
-
-        return toResponse(pedido, usuario);
+        // 4. Mapear y retornar el DTO de respuesta.
+        return mapearAResponseDTO(pedidoGuardado);
     }
 
     @Override
     public List<PedidoResponseDTO> listarTodos() {
         return pedidoRepository.findAll()
                 .stream()
-                .map(pedido -> {
-                    Usuario usuario = usuarioRepository.findById(pedido.getUsuarioId())
-                            .orElseThrow(() -> new UsuarioNoEncontradoException(
-                                    "Usuario no encontrado con id: " + pedido.getUsuarioId()));
-                    return toResponse(pedido, usuario);
-                })
-                .toList();
+                .map(this::mapearAResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<PedidoResponseDTO> listarPorUsuario(String usuarioId) {
-        usuarioRepository.findById(usuarioId)
+    public PedidoResponseDTO buscarPorId(String id) {
+        Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(
-                        "Usuario no encontrado con id: " + usuarioId));
+                        "No se encontró un pedido con el id: " + id));
+        return mapearAResponseDTO(pedido);
+    }
 
+    @Override
+    public List<PedidoResponseDTO> buscarPorUsuario(String usuarioId) {
+        // Usa el método derivado del repositorio
         return pedidoRepository.findByUsuarioId(usuarioId)
                 .stream()
-                .map(pedido -> {
-                    Usuario usuario = usuarioRepository.findById(pedido.getUsuarioId()).orElseThrow();
-                    return toResponse(pedido, usuario);
-                })
-                .toList();
+                .map(this::mapearAResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public PedidoResponseDTO actualizarEstado(String id, String nuevoEstado) {
-        Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));
+    public List<PedidoResponseDTO> buscarPorEstado(String estado) {
+        return pedidoRepository.findByEstado(estado)
+                .stream()
+                .map(this::mapearAResponseDTO)
+                .collect(Collectors.toList());
+    }
 
-        pedido.setEstado(nuevoEstado);
-        Pedido actualizado = pedidoRepository.save(pedido);
+    @Override
+    public List<PedidoResponseDTO> buscarPorCiudad(String ciudad) {
+        // Usa la @Query con punto para acceder al campo anidado
+        return pedidoRepository.findByDireccionEntregaCiudad(ciudad)
+                .stream()
+                .map(this::mapearAResponseDTO)
+                .collect(Collectors.toList());
+    }
 
-        Usuario usuario = usuarioRepository.findById(pedido.getUsuarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException(
-                        "Usuario no encontrado con id: " + pedido.getUsuarioId()));
-
-        return toResponse(actualizado, usuario);
+    @Override
+    public List<PedidoResponseDTO> buscarPorDescripcion(String texto) {
+        // Usa la @Query con $regex — tarea de los estudiantes
+        return pedidoRepository.findByDescripcionContiene(texto)
+                .stream()
+                .map(this::mapearAResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void eliminar(String id) {
         if (!pedidoRepository.existsById(id)) {
-            throw new RuntimeException("Pedido no encontrado con id: " + id);
+            throw new UsuarioNoEncontradoException(
+                    "No se encontró un pedido con el id: " + id);
         }
         pedidoRepository.deleteById(id);
     }
 
-    // ── Mapper privado ──────────────────────────────────────────────────────────
-    private PedidoResponseDTO toResponse(Pedido pedido, Usuario usuario) {
+    // ── Método auxiliar privado ──────────────────────────────────────────────
+    // Convierte un Pedido (entidad) a PedidoResponseDTO.
+    // Extrae solo nombre y email del usuario referenciado — no expone el objeto completo.
+    private PedidoResponseDTO mapearAResponseDTO(Pedido pedido) {
         return PedidoResponseDTO.builder()
                 .id(pedido.getId())
                 .descripcion(pedido.getDescripcion())
@@ -111,8 +122,8 @@ public class PedidoServiceImpl implements IPedidoService {
                 .fechaCreacion(pedido.getFechaCreacion())
                 .estado(pedido.getEstado())
                 .direccionEntrega(pedido.getDireccionEntrega())
-                .usuarioNombre(usuario.getNombre())
-                .usuarioEmail(usuario.getEmail())
+                .usuarioNombre(pedido.getUsuario() != null ? pedido.getUsuario().getNombre() : null)
+                .usuarioEmail(pedido.getUsuario() != null ? pedido.getUsuario().getEmail() : null)
                 .build();
     }
 }

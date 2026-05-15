@@ -7,15 +7,19 @@ import java.util.List;
 
 public interface IPedidoService {
 
-    PedidoResponseDTO crearPedido(PedidoRequestDTO request);
-
-    PedidoResponseDTO buscarPorId(String id);
+    PedidoResponseDTO crear(PedidoRequestDTO dto);
 
     List<PedidoResponseDTO> listarTodos();
 
-    List<PedidoResponseDTO> listarPorUsuario(String usuarioId);
+    PedidoResponseDTO buscarPorId(String id);
 
-    PedidoResponseDTO actualizarEstado(String id, String nuevoEstado);
+    List<PedidoResponseDTO> buscarPorUsuario(String usuarioId);
+
+    List<PedidoResponseDTO> buscarPorEstado(String estado);
+
+    List<PedidoResponseDTO> buscarPorCiudad(String ciudad);
+
+    List<PedidoResponseDTO> buscarPorDescripcion(String texto);
 
     void eliminar(String id);
 }
