@@ -38,7 +38,7 @@ public class Cliente {
     @JsonIgnore
     private List<Pedido> pedidos = new ArrayList<>();
 
-    // ✅ Requerido por JPA
+    // Requerido por JPA
     public Cliente() {}
 
     // ✅ Sin id — la BD lo genera
