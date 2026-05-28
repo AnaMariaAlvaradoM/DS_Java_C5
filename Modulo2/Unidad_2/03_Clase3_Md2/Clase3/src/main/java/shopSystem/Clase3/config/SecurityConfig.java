@@ -58,24 +58,24 @@ public class SecurityConfig {
     }
 
     // BEAN 3: UserDetailsService — define de dónde carga Spring los usuarios.
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-
-        // Usuario ADMIN: acceso total al sistema.
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(encoder.encode("admin123")) // contraseña hasheada con BCrypt
-                .roles("ADMIN") // Spring agrega el prefijo ROLE_ internamente
-                .build();
-
-        // Usuario CLIENTE: acceso limitado (lectura).
-        UserDetails cliente = User.builder()
-                .username("cliente")
-                .password(encoder.encode("cliente123"))
-                .roles("CLIENTE")
-                .build();
-
-        // InMemoryUserDetailsManager mantiene estos usuarios en memoria.
-        return new InMemoryUserDetailsManager(admin, cliente);
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
+//
+//        // Usuario ADMIN: acceso total al sistema.
+//        UserDetails admin = User.builder()
+//                .username("admin")
+//                .password(encoder.encode("admin123")) // contraseña hasheada con BCrypt
+//                .roles("ADMIN") // Spring agrega el prefijo ROLE_ internamente
+//                .build();
+//
+//        // Usuario CLIENTE: acceso limitado (lectura).
+//        UserDetails cliente = User.builder()
+//                .username("cliente")
+//                .password(encoder.encode("cliente123"))
+//                .roles("CLIENTE")
+//                .build();
+//
+//        // InMemoryUserDetailsManager mantiene estos usuarios en memoria.
+//        return new InMemoryUserDetailsManager(admin, cliente);
+//    }
 }
