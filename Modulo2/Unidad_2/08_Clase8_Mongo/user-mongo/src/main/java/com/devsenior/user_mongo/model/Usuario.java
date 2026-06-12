@@ -8,6 +8,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+
+
+
 @Document(collection = "usuarios")   // ← equivale a @Entity + @Table en JPA
 @Data                                   // ← Lombok: genera getters, setters, toString, equals, hashCode
 @Builder                                // ← Lombok: permite construir objetos con patrón Builder
