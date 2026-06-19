@@ -14,11 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * JwtUtil — identico al de ShopSystem (Clase 3).
- * Genera, valida y extrae datos de tokens JWT.
- * NO depende de la base de datos: trabaja con UserDetails de Spring Security.
- */
 @Component
 public class JwtUtil {
 

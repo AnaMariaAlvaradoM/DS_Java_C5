@@ -23,13 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * SecurityConfig — configuracion de seguridad para NoteVault.
- *
- * CLAVE NUEVA respecto a Clase 3:
- * @EnableMethodSecurity activa las anotaciones @PreAuthorize en los metodos.
- * Sin ella, el control de roles a nivel de metodo NO funciona.
- */
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity   // <-- ESTA LINEA habilita @PreAuthorize
@@ -68,9 +62,17 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+//                .exceptionHandling(ex -> ex
+//                        .authenticationEntryPoint((request, response, authException) ->
+//                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No autenticado")
+//                        )
+//                )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No autenticado")
+                        )
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso denegado")
                         )
                 )
                 .authorizeHttpRequests(auth -> auth

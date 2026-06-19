@@ -31,5 +31,4 @@ public interface IPedidoRepository extends MongoRepository<Pedido, String> {
     @Query("{ 'direccionEntrega.ciudad': ?0, 'total': { $gt: ?1 } }")
     List<Pedido> findByCiudadAndTotalGreaterThan(
             String ciudad, Double total);
-
 }

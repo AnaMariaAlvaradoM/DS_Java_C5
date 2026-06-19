@@ -1,12 +1,14 @@
 package com.devSenior.AppNotas.controller;
 
 
-import com.devPrubea.demo.dto.AuthRequest;
-import com.devPrubea.demo.dto.AuthResponse;
-import com.devPrubea.demo.model.Rol;
-import com.devPrubea.demo.model.Usuario;
-import com.devPrubea.demo.repository.UsuarioRepository;
-import com.devPrubea.demo.security.JwtUtil;
+import com.devSenior.AppNotas.dto.AuthRequest;
+import com.devSenior.AppNotas.dto.AuthResponse;
+import com.devSenior.AppNotas.dto.UsuarioDTO;
+import com.devSenior.AppNotas.model.Rol;
+import com.devSenior.AppNotas.model.Usuario;
+import com.devSenior.AppNotas.repository.UsuarioRepository;
+import com.devSenior.AppNotas.security.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,9 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * AuthController — registro y login. Casi identico al de ShopSystem.
- */
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -39,16 +39,15 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/registro")
-    public ResponseEntity<String> registro(@RequestBody AuthRequest request) {
-        if (usuarioRepository.findByUsername(request.getUsername()).isPresent()) {
+    public ResponseEntity<String> registro(@Valid @RequestBody UsuarioDTO dto) {
+        if (usuarioRepository.findByUsername(dto.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("El usuario ya existe");
         }
-
         Usuario nuevo = new Usuario();
-        nuevo.setUsername(request.getUsername());
-        nuevo.setPassword(passwordEncoder.encode(request.getPassword()));
+        nuevo.setUsername(dto.getUsername());
+        nuevo.setPassword(passwordEncoder.encode(dto.getPassword()));
         // Si no envian rol, por defecto es USER
-        nuevo.setRol(request.getRol() != null ? request.getRol() : Rol.USER);
+        nuevo.setRol(dto.getRol() != null ? dto.getRol() : Rol.USER);
 
         usuarioRepository.save(nuevo);
         return ResponseEntity.ok("Usuario registrado correctamente con rol "
@@ -56,11 +55,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody UsuarioDTO dto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
+                        dto.getUsername(),
+                        dto.getPassword()
                 )
         );
 

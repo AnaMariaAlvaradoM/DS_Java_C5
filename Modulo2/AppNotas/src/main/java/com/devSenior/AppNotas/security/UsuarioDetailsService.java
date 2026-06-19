@@ -1,6 +1,6 @@
 package com.devSenior.AppNotas.security;
-import com.devPrubea.demo.model.Usuario;
-import com.devPrubea.demo.repository.UsuarioRepository;
+import com.devSenior.AppNotas.model.Usuario;
+import com.devSenior.AppNotas.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -11,13 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * UsuarioDetailsService — carga un usuario de Mongo y lo convierte
- * en el UserDetails que Spring Security entiende.
- *
- * El rol se convierte en una authority con prefijo "ROLE_".
- * Ese prefijo es obligatorio para que @PreAuthorize("hasRole('ADMIN')") funcione.
- */
 @Service
 public class UsuarioDetailsService implements UserDetailsService {
 

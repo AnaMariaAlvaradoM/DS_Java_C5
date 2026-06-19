@@ -1,8 +1,9 @@
 package com.devSenior.AppNotas.controller;
 
-
-import com.devPrubea.demo.model.Nota;
-import com.devPrubea.demo.service.NotaService;
+import com.devSenior.AppNotas.dto.NotaDTO;
+import com.devSenior.AppNotas.model.Nota;
+import com.devSenior.AppNotas.service.NotaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,13 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * NotaController — endpoints REST de notas con control de acceso.
- *
- * Dos tipos de control conviven:
- *  - Por ROL:   @PreAuthorize("hasRole('ADMIN')") en /todas
- *  - Por DUEÑO: el resto pasa el username al servicio para filtrar por usuarioId
- */
+
 @RestController
 @RequestMapping("/api/notas")
 public class NotaController {
@@ -36,7 +31,12 @@ public class NotaController {
      * Cualquier usuario autenticado (USER o ADMIN) puede crear.
      */
     @PostMapping
-    public ResponseEntity<Nota> crear(@RequestBody Nota nota, Authentication auth) {
+    public ResponseEntity<Nota> crear(@Valid @RequestBody NotaDTO dto, Authentication auth) {
+        Nota nota = new Nota();
+        nota.setTitulo(dto.getTitulo());
+        nota.setContenido(dto.getContenido());
+        nota.setEtiquetas(dto.getEtiquetas());
+
         Nota creada = notaService.crear(nota, auth.getName());
         return ResponseEntity.ok(creada);
     }

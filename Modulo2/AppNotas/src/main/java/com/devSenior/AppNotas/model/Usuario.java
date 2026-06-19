@@ -9,6 +9,8 @@ public class Usuario {
     @Id
     private String id;                 // Mongo usa String para el _id
 
+//    private String nombre;
+//    private String apellido;
     private String username;
     private String password;           // siempre encriptada con BCrypt
     private Rol rol;

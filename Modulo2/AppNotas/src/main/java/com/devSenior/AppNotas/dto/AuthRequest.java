@@ -1,11 +1,8 @@
 package com.devSenior.AppNotas.dto;
 
-import com.devPrubea.demo.model.Rol;
 
-/**
- * AuthRequest — datos para registro y login.
- * El campo rol solo se usa en el registro (en login se ignora).
- */
+import com.devSenior.AppNotas.model.Rol;
+
 public class AuthRequest {
     private String username;
     private String password;

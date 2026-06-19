@@ -16,10 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * JwtAuthFilter — identico al de ShopSystem (Clase 3).
- * Intercepta cada peticion, valida el JWT y registra la autenticacion.
- */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 

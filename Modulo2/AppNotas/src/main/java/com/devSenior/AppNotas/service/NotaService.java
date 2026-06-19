@@ -1,16 +1,10 @@
 package com.devSenior.AppNotas.service;
 
-
-import com.devPrubea.demo.model.Nota;
+import com.devSenior.AppNotas.model.Nota;
 
 import java.util.List;
 
-/**
- * NotaService — contrato de operaciones sobre notas.
- *
- * Cada metodo recibe el username de quien hace la peticion y su rol,
- * porque la logica de acceso (ver todo vs ver lo mio) depende de eso.
- */
+
 public interface NotaService {
 
     // Crea una nota para el usuario dado

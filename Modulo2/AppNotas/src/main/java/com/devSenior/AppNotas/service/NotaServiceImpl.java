@@ -2,10 +2,11 @@ package com.devSenior.AppNotas.service;
 
 
 
-import com.devPrubea.demo.model.Nota;
-import com.devPrubea.demo.model.Usuario;
-import com.devPrubea.demo.repository.NotaRepository;
-import com.devPrubea.demo.repository.UsuarioRepository;
+import com.devSenior.AppNotas.exception.RecursoNoEncontradoException;
+import com.devSenior.AppNotas.model.Nota;
+import com.devSenior.AppNotas.model.Usuario;
+import com.devSenior.AppNotas.repository.NotaRepository;
+import com.devSenior.AppNotas.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,14 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * NotaServiceImpl — implementacion con la regla de ownership.
- *
- * Regla central de la clase:
- *   - El dueño de una nota puede verla, editarla y borrarla.
- *   - El ADMIN puede ver y borrar cualquier nota.
- *   - Nadie mas puede tocar notas ajenas.
- */
 @Service
 public class NotaServiceImpl implements NotaService {
 
@@ -63,9 +56,8 @@ public class NotaServiceImpl implements NotaService {
     public Nota obtenerPorId(String id, String username, boolean esAdmin) {
         Nota nota = notaRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Nota no encontrada: " + id));
+                        new RecursoNoEncontradoException("Nota no encontrada: " + id));
 
-        // El ADMIN ve cualquier nota; el USER solo si es suya
         String usuarioId = obtenerUsuarioId(username);
         if (!esAdmin && !nota.getUsuarioId().equals(usuarioId)) {
             throw new AccessDeniedException("No puedes ver una nota que no es tuya");
@@ -77,7 +69,7 @@ public class NotaServiceImpl implements NotaService {
     public void eliminar(String id, String username, boolean esAdmin) {
         Nota nota = notaRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Nota no encontrada: " + id));
+                        new RecursoNoEncontradoException("Nota no encontrada: " + id));
 
         String usuarioId = obtenerUsuarioId(username);
         if (!esAdmin && !nota.getUsuarioId().equals(usuarioId)) {
