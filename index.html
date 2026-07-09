@@ -1,1998 +1,1803 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
 <!--
-  ============================================================
+============================================================================
   © 2026 Ana Alvarado — Todos los derechos reservados.
   Educadora Tech & Desarrolladora Full Stack.
-  Material de autoría exclusiva. Prohibida su reproducción,
-  redistribución, modificación o uso fuera del contexto de
-  clase sin autorización escrita.
-  linkedin.com/in/ana-alvarado-instructora-full-stack
-  ============================================================
+  Material de autoría exclusiva. Prohibida su reproducción, redistribución,
+  modificación o uso fuera del contexto de clase sin autorización escrita.
+============================================================================
 -->
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VetCare · Clase 2 — CRUD, DTOs y Swagger</title>
-<meta name="author" content="Ana Alvarado">
-<meta name="copyright" content="© 2026 Ana Alvarado — Todos los derechos reservados">
-<meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
-<meta name="description" content="Recurso de clase — Módulo 4, Clase 2: CRUD completo, DTOs y Swagger — Proyecto VetCare">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --accent: #6018F0;
-    --accent-strong: #5418CC;
-    --accent-dark: #3C1884;
-    --accent-soft: rgba(96,24,240,.14);
-    --bg-void: #0A0812;
-    --bg-base: #120D1E;
-    --bg-elevated: #181228;
-    --bg-card: #1D1730;
-    --bg-card-hover: #241C3C;
-    --border-subtle: #2C2444;
-    --border-accent: rgba(96,24,240,.45);
-    --text-primary: #F3F0FA;
-    --text-secondary: #B3A7CF;
-    --text-dim: #7B7096;
-    --code-bg: #0D0A17;
-    --success: #34D399;
-    --warning: #FBBF24;
-    --danger: #F87171;
-    --sidebar-w: 280px;
-    --font-body: 'Inter', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  }
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  *{box-sizing:border-box; margin:0; padding:0;}
+  <!-- ════════════════════════════════════════════════════════════════════
+       META FIJO — no tocar
+       ════════════════════════════════════════════════════════════════════ -->
+  <meta name="author" content="Ana Alvarado">
+  <meta name="copyright" content="© 2026 Ana Alvarado — Todos los derechos reservados">
+  <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
 
-  html{scroll-behavior:smooth;}
+  <!-- ┌──────────────────────────────────────────────────────────────────┐
+       │  HUECO 1 · TÍTULO DE LA CLASE                                      │
+       └──────────────────────────────────────────────────────────────────┘ -->
+  <title>Módulo 4 · Clase 3 · Seguridad con JWT · Ana Alvarado</title>
 
-  body{
-    background: radial-gradient(circle at 15% 0%, #1A1130 0%, var(--bg-void) 45%) fixed;
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    line-height: 1.6;
-    min-height:100vh;
-    -webkit-user-select:none; user-select:none;
-  }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  code, pre, .code-block, .code-block *{
-    -webkit-user-select:text; user-select:text;
-  }
+  <style>
+    /* ══════════════════════════════════════════════════════════════════
+       ESTILOS FIJOS — no se regeneran entre clases.
+       Lo ÚNICO que se cambia aquí es el bloque "ACENTO POR EMPRESA".
+       ══════════════════════════════════════════════════════════════════ */
 
-  ::selection{ background: var(--accent-strong); color:#fff; }
+    /* ┌────────────────────────────────────────────────────────────────┐
+       │  HUECO 2 · ACENTO POR EMPRESA                                    │
+       │  Esta clase es de Dev Senior → morado (activo por defecto).      │
+       └────────────────────────────────────────────────────────────────┘ */
 
-  a{ color: inherit; }
+    :root {
+      /* ── DEV SENIOR (morado) ── ACTIVO ── */
+      --accent:      #A88CFF;   /* acento principal en modo oscuro */
+      --accent-2:    #8B6FE8;   /* acento secundario / hover */
+      --accent-ink:  #5418CC;   /* acento fuerte para modo claro */
 
-  /* ---------- Layout ---------- */
-  .app{ display:flex; min-height:100vh; }
-
-  .sidebar{
-    width: var(--sidebar-w);
-    flex-shrink:0;
-    background: linear-gradient(180deg, var(--bg-elevated), var(--bg-base));
-    border-right: 1px solid var(--border-subtle);
-    padding: 22px 16px;
-    position: sticky; top:0; height:100vh;
-    display:flex; flex-direction:column;
-    z-index: 40;
-  }
-
-  .brand{
-    display:flex; align-items:center; gap:10px;
-    padding: 6px 8px 18px 8px;
-    border-bottom: 1px solid var(--border-subtle);
-    margin-bottom: 14px;
-  }
-  .brand-mark{
-    width:38px; height:38px; border-radius:10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    display:flex; align-items:center; justify-content:center;
-    font-size:19px; box-shadow: 0 4px 18px rgba(96,24,240,.45);
-    flex-shrink:0;
-  }
-  .brand-text .t1{ font-weight:800; font-size:15px; letter-spacing:.3px; }
-  .brand-text .t2{ font-size:11px; color:var(--text-dim); font-family:var(--font-mono); }
-
-  .progress-wrap{ padding: 4px 8px 14px 8px; }
-  .progress-label{
-    font-family: var(--font-mono); font-size:10.5px; color:var(--text-dim);
-    text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;
-    display:flex; justify-content:space-between;
-  }
-  .progress-track{
-    height:6px; background:var(--bg-card); border-radius:6px; overflow:hidden;
-    border:1px solid var(--border-subtle);
-  }
-  .progress-fill{
-    height:100%; width:0%;
-    background: linear-gradient(90deg, var(--accent-strong), var(--accent));
-    transition: width .4s ease;
-  }
-
-  nav.toc{ flex:1; overflow-y:auto; padding-right:2px; }
-  nav.toc::-webkit-scrollbar{ width:6px; }
-  nav.toc::-webkit-scrollbar-thumb{ background:var(--border-subtle); border-radius:6px; }
-
-  .toc-item{
-    display:flex; align-items:center; gap:10px;
-    padding: 9px 10px; border-radius:9px; cursor:pointer;
-    font-size:13.2px; color:var(--text-secondary);
-    margin-bottom:2px; border:1px solid transparent;
-    transition: all .15s ease;
-  }
-  .toc-item:hover{ background:var(--bg-card); color:var(--text-primary); }
-  .toc-item.active{
-    background: var(--accent-soft);
-    border-color: var(--border-accent);
-    color:#fff; font-weight:600;
-  }
-  .toc-icon{ font-size:15px; width:20px; text-align:center; }
-  .toc-dot{
-    margin-left:auto; width:7px; height:7px; border-radius:50%;
-    background: var(--border-subtle); flex-shrink:0;
-  }
-  .toc-item.seen .toc-dot{ background: var(--success); }
-
-  .sidebar-footer{
-    padding-top: 12px; border-top: 1px solid var(--border-subtle);
-    font-size:10.5px; color:var(--text-dim); text-align:center; line-height:1.5;
-  }
-  .present-btn{
-    width:100%; margin-top:10px; padding:9px 10px; border-radius:9px;
-    background: linear-gradient(135deg, var(--accent-strong), var(--accent));
-    border:none; color:#fff; font-family:var(--font-body); font-weight:600;
-    font-size:12.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;
-    -webkit-user-select:none; user-select:none;
-    box-shadow: 0 4px 16px rgba(96,24,240,.35);
-  }
-  .present-btn:hover{ filter:brightness(1.08); }
-
-  /* ---------- Main ---------- */
-  main{ flex:1; min-width:0; }
-
-  .section{
-    min-height:100vh;
-    padding: 64px 56px 90px 56px;
-    max-width: 1080px;
-    border-bottom: 1px solid var(--border-subtle);
-    scroll-margin-top: 20px;
-  }
-  .section:last-of-type{ border-bottom:none; }
-
-  .eyebrow{
-    font-family: var(--font-mono); font-size:12px; color:var(--accent);
-    text-transform:uppercase; letter-spacing:.14em; font-weight:600;
-    display:flex; align-items:center; gap:8px; margin-bottom:14px;
-  }
-  .eyebrow::before{ content:''; width:22px; height:2px; background:var(--accent); display:inline-block; }
-
-  h1.section-title{
-    font-size: clamp(28px, 4vw, 42px); font-weight:800; letter-spacing:-.02em;
-    display:flex; align-items:center; gap:16px; margin-bottom:10px;
-  }
-  .section-title .icon{ font-size:.9em; }
-  .section-sub{ color:var(--text-secondary); font-size:16px; max-width:680px; margin-bottom:38px; }
-
-  h2.block-title{
-    font-size:22px; font-weight:700; margin: 40px 0 14px 0;
-    display:flex; align-items:center; gap:10px;
-  }
-  h3.sub-title{ font-size:16.5px; font-weight:700; margin: 24px 0 10px 0; color:var(--text-primary); }
-
-  p{ color: var(--text-secondary); margin-bottom:14px; font-size:15px; max-width:760px; }
-  strong{ color: var(--text-primary); font-weight:650; }
-
-  .lead{ font-size:16.5px; color:var(--text-primary); }
-
-  /* Cards */
-  .card{
-    background: var(--bg-card);
-    border:1px solid var(--border-subtle);
-    border-radius:14px;
-    padding:22px 24px;
-    margin: 18px 0;
-  }
-  .card-title{ font-weight:700; font-size:14.5px; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
-
-  .tip-banner{
-    background: linear-gradient(135deg, rgba(96,24,240,.14), rgba(96,24,240,.04));
-    border:1px solid var(--border-accent);
-    border-left: 4px solid var(--accent);
-    border-radius:10px;
-    padding:16px 20px;
-    margin:20px 0;
-    display:flex; gap:12px; align-items:flex-start;
-  }
-  .tip-banner .emoji{ font-size:20px; flex-shrink:0; }
-  .tip-banner p{ margin:0; color:var(--text-primary); font-size:14.5px; }
-
-  .real-life{
-    background: var(--bg-elevated);
-    border:1px dashed var(--border-subtle);
-    border-radius:10px;
-    padding:14px 18px;
-    margin:16px 0;
-    font-size:14.5px;
-  }
-  .real-life .lbl{ font-family:var(--font-mono); font-size:10.5px; color:var(--accent); text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:5px; display:block; }
-
-  /* Copyright notice card */
-  .copyright-card{
-    background: linear-gradient(135deg, rgba(96,24,240,.12), rgba(60,24,132,.08));
-    border:1px solid var(--border-accent);
-    border-left:4px solid var(--accent);
-    border-radius:12px;
-    padding:18px 22px;
-    margin: 26px 0 10px 0;
-  }
-  .copyright-card .ttl{
-    font-family:var(--font-mono); font-size:12px; letter-spacing:.1em;
-    color:var(--accent); font-weight:700; text-transform:uppercase;
-    display:flex; align-items:center; gap:8px; margin-bottom:8px;
-  }
-  .copyright-card p{ font-size:13px; color:var(--text-secondary); margin:0; max-width:none; }
-
-  /* Question / reveal */
-  .question-block{
-    background: var(--bg-elevated);
-    border:1px solid var(--border-subtle);
-    border-radius:12px;
-    padding:20px 22px;
-    margin:20px 0;
-  }
-  .question-block .qmark{ color:var(--accent); font-size:18px; margin-right:6px; }
-  .question-text{ font-weight:600; color:var(--text-primary); font-size:15px; margin-bottom:14px; }
-  .reveal-btn{
-    background: transparent;
-    border:1px solid var(--border-accent);
-    color: var(--accent);
-    font-family: var(--font-body); font-weight:600; font-size:12.5px;
-    padding:8px 16px; border-radius:8px; cursor:pointer;
-    display:inline-flex; align-items:center; gap:6px;
-    transition: all .15s ease;
-  }
-  .reveal-btn:hover{ background: var(--accent-soft); }
-  .reveal-answer{
-    display:none; margin-top:14px; padding-top:14px;
-    border-top:1px dashed var(--border-subtle);
-    font-size:14.5px; color: var(--text-secondary);
-  }
-  .reveal-answer.show{ display:block; }
-  .reveal-answer strong{ color: var(--text-primary); }
-
-  /* Code blocks */
-  .code-wrap{
-    position:relative; margin: 16px 0 22px 0;
-  }
-  .code-file{
-    font-family: var(--font-mono); font-size:11.5px; color:var(--text-dim);
-    margin-bottom:6px; display:flex; align-items:center; gap:6px;
-  }
-  .code-block{
-    background: var(--code-bg);
-    border:1px solid var(--border-subtle);
-    border-radius:10px;
-    padding: 16px 18px;
-    padding-top: 44px;
-    overflow-x:auto;
-    font-family: var(--font-mono);
-    font-size:12.6px;
-    line-height:1.65;
-    color:#DCD6EE;
-    position:relative;
-    white-space: pre;
-    tab-size: 4;
-  }
-  .code-block .kw{ color:#B084F5; }
-  .code-block .str{ color:#8CE79A; }
-  .code-block .cm{ color:#6B6285; font-style:italic; }
-  .code-block .an{ color:#63C9E8; }
-  .code-block .cls{ color:#F5C26B; }
-  .copy-btn{
-    position:absolute; top:10px; right:10px;
-    background: var(--bg-card);
-    border:1px solid var(--border-subtle);
-    color:var(--text-secondary);
-    font-family:var(--font-body); font-size:11.5px; font-weight:600;
-    padding:6px 11px; border-radius:7px; cursor:pointer;
-    display:flex; align-items:center; gap:5px;
-    -webkit-user-select:none; user-select:none;
-  }
-  .copy-btn:hover{ border-color:var(--border-accent); color:#fff; }
-  .copy-btn.copied{ color:var(--success); border-color:var(--success); }
-
-  /* Tables */
-  table{ width:100%; border-collapse:collapse; margin:18px 0; font-size:13.5px; }
-  th,td{ text-align:left; padding:10px 14px; border-bottom:1px solid var(--border-subtle); }
-  th{ color:var(--accent); font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
-  td{ color: var(--text-secondary); }
-  td strong, td code{ color:var(--text-primary); }
-  tr:hover td{ background: var(--bg-elevated); }
-  code.inline{
-    font-family:var(--font-mono); background:var(--bg-elevated);
-    padding:2px 7px; border-radius:5px; font-size:12.5px; color:#C9B8F5;
-    border:1px solid var(--border-subtle);
-  }
-
-  .error-table th:first-child{ color:var(--danger); }
-
-  /* grids */
-  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-  .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-  @media (max-width: 860px){ .grid-2, .grid-3{ grid-template-columns:1fr; } }
-
-  .stat-card{
-    background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px;
-    padding:16px 18px;
-  }
-  .stat-card .num{ font-size:26px; font-weight:800; color:var(--accent); font-family:var(--font-mono); }
-  .stat-card .lbl{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
-
-  .step-chip{
-    display:inline-flex; align-items:center; gap:8px;
-    background:var(--bg-elevated); border:1px solid var(--border-subtle);
-    border-radius:20px; padding:6px 14px; font-size:12.5px; font-family:var(--font-mono);
-    color:var(--text-secondary); margin: 4px 6px 4px 0;
-  }
-  .step-chip b{ color:var(--accent); }
-
-  .divider{ height:1px; background:var(--border-subtle); margin:34px 0; }
-
-  .badge{
-    display:inline-block; font-family:var(--font-mono); font-size:11px;
-    padding:2px 9px; border-radius:20px; font-weight:700; letter-spacing:.03em;
-  }
-  .badge.get{ background:rgba(52,211,153,.15); color:var(--success); }
-  .badge.post{ background:rgba(96,24,240,.2); color:#B58CF5; }
-  .badge.put{ background:rgba(251,191,36,.15); color:var(--warning); }
-  .badge.delete{ background:rgba(248,113,113,.15); color:var(--danger); }
-
-  .concept-item{
-    display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border-subtle);
-  }
-  .concept-item:last-child{ border-bottom:none; }
-  .concept-item .cbadge{
-    font-family:var(--font-mono); font-weight:700; color:var(--accent);
-    background:var(--accent-soft); border-radius:8px; padding:4px 10px; height:fit-content; font-size:13px; white-space:nowrap;
-  }
-
-  .faq-item{ margin-bottom:16px; }
-  .faq-q{ font-weight:700; color:var(--text-primary); font-size:14.5px; margin-bottom:5px; display:flex; gap:8px;}
-  .faq-a{ color:var(--text-secondary); font-size:14px; padding-left:24px; }
-
-  /* Portada */
-  .cover{
-    min-height:100vh; display:flex; flex-direction:column; justify-content:center;
-    padding: 64px 56px; position:relative; overflow:hidden;
-  }
-  .cover::before{
-    content:''; position:absolute; top:-20%; right:-10%; width:520px; height:520px;
-    background: radial-gradient(circle, rgba(96,24,240,.35), transparent 70%);
-    filter:blur(40px); pointer-events:none;
-  }
-  .cover-kicker{
-    font-family:var(--font-mono); color:var(--accent); font-size:13px; letter-spacing:.16em;
-    text-transform:uppercase; font-weight:700; margin-bottom:18px;
-  }
-  .cover h1{
-    font-size: clamp(34px, 5.5vw, 60px); font-weight:800; letter-spacing:-.03em; line-height:1.08;
-    max-width:820px; margin-bottom:18px;
-  }
-  .cover h1 span{ color:var(--accent); }
-  .cover p.sub{ font-size:17px; color:var(--text-secondary); max-width:600px; margin-bottom:28px;}
-  .meta-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:36px; }
-
-  .flow-diagram{ width:100%; max-width:820px; margin-top:10px; }
-
-  /* SVG helper */
-  svg text{ font-family: var(--font-body); }
-  svg .mono{ font-family: var(--font-mono); }
-
-  /* Watermark */
-  .watermark{
-    position:fixed; bottom:14px; right:18px; z-index:50;
-    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
-    opacity:.4; pointer-events:none; -webkit-user-select:none; user-select:none;
-  }
-  @media (max-width: 720px){ .watermark{ display:none; } }
-
-  /* Footer */
-  .site-footer{
-    padding: 40px 56px 60px 56px; text-align:center;
-    color:var(--text-dim); font-size:12px; line-height:1.8;
-  }
-  .site-footer a{ color:var(--accent); }
-
-  /* Presentation mode */
-  body.presenting .sidebar{ display:none; }
-  body.presenting main{ width:100%; }
-  body.presenting .section{
-    max-width:none; min-height:100vh;
-    display:flex; flex-direction:column; justify-content:center;
-    padding: 60px 90px;
-  }
-  body.presenting .site-footer{ display:none; }
-
-  .present-hint{
-    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
-    background: var(--bg-card); border:1px solid var(--border-subtle);
-    padding:8px 18px; border-radius:30px; font-family:var(--font-mono); font-size:11.5px;
-    color:var(--text-secondary); display:none; align-items:center; gap:14px; z-index:60;
-  }
-  body.presenting .present-hint{ display:flex; }
-  .present-hint kbd{
-    background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px;
-    padding:2px 7px; font-size:11px; color:var(--accent);
-  }
-
-  /* Mobile */
-  @media (max-width: 900px){
-    .sidebar{ position:fixed; left:-300px; transition:left .25s ease; }
-    .sidebar.open{ left:0; }
-    .section{ padding: 90px 22px 60px 22px; }
-    .mobile-toggle{
-      position:fixed; top:16px; left:16px; z-index:60;
-      background:var(--accent); border:none; color:#fff; width:42px; height:42px;
-      border-radius:10px; font-size:18px; display:flex; align-items:center; justify-content:center;
-      box-shadow:0 4px 14px rgba(96,24,240,.5);
+      /* ── GENERATION COLOMBIA (azul) ── descomenta para usar ──
+      --accent:      #4FA3D9;
+      --accent-2:    #3B8BC4;
+      --accent-ink:  #006CA8;
+      */
     }
-    .grid-2{ grid-template-columns:1fr; }
-  }
-  .mobile-toggle{ display:none; }
-  @media (max-width: 900px){ .mobile-toggle{ display:flex; } }
-</style>
+
+    /* ── PALETA MODO OSCURO (por defecto) ── */
+    :root {
+      --bg:        #16151C;
+      --surface:   #1C1B24;
+      --surface-2: #23222D;
+      --border:    #2C2A38;
+      --text:      #EAE8F0;
+      --text-dim:  #9C98A8;
+      --code-bg:   #121016;
+      --code-text: #E4E1EA;
+      --shadow:    rgba(0,0,0,0.3);
+    }
+
+    /* ── PALETA MODO CLARO (papel cálido) ── */
+    :root[data-tema="claro"] {
+      --bg:        #FAF8F3;
+      --surface:   #F4F1EA;
+      --surface-2: #FFFFFF;
+      --border:    #E8E3D9;
+      --text:      #2A2620;
+      --text-dim:  #8A8478;
+      --code-bg:   #2A2620;
+      --code-text: #F0EDE6;
+      --shadow:    rgba(0,0,0,0.08);
+      --accent:    var(--accent-ink);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.35s, color 0.35s;
+      user-select: none;               /* protección: no seleccionar en general */
+    }
+
+    /* ── LAYOUT: barra lateral fija + contenido centrado ── */
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 0.5px solid var(--border);
+      padding: 28px 20px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      transition: background 0.35s, border-color 0.35s;
+    }
+
+    .sidebar-brand {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 19px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 2px;
+      line-height: 1.25;
+    }
+    .sidebar-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 26px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-size: 13.5px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+      border-left: 2px solid transparent;
+      border-radius: 0 8px 8px 0;
+    }
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-item.active {
+      color: var(--text);
+      font-weight: 500;
+      border-left: 2px solid var(--accent);
+      background: var(--surface-2);
+    }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    /* ── ÁREA DE CONTENIDO: columna centrada (clave para proyectar) ── */
+    .content-area { flex: 1; padding: 0 24px; }
+    .content-column {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 48px 0 80px;
+    }
+
+    /* ── ENCABEZADO DE CLASE ── */
+    .clase-header { margin-bottom: 36px; }
+    .clase-kicker {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .clase-titulo {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 34px;
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    /* ── SECCIONES ── */
+    .seccion { margin-bottom: 44px; scroll-margin-top: 32px; }
+    .seccion-numero {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .seccion h2 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 25px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .seccion h3 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      margin: 24px 0 10px;
+    }
+    .seccion p { margin-bottom: 14px; color: var(--text); }
+    .seccion strong { font-weight: 600; color: var(--text); }
+
+    /* ── TARJETA ── */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 18px;
+      transition: background 0.35s, border-color 0.35s;
+    }
+
+    /* ── BLOQUE TIP / DESTACADO (borde de acento, sin relleno de color) ── */
+    .tip {
+      background: var(--surface);
+      border-left: 2px solid var(--accent);
+      border-radius: 0;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      transition: background 0.35s;
+    }
+    .tip-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .tip p { margin: 0; color: var(--text-dim); font-size: 14.5px; }
+
+    /* ── DEFINICIÓN (técnica + vida real) ── */
+    .definicion { border-left: 2px solid var(--border); padding-left: 18px; margin-bottom: 18px; }
+    .definicion .tecnica { color: var(--text); margin-bottom: 8px; }
+    .definicion .real { color: var(--text-dim); font-size: 14.5px; }
+    .definicion .real::before { content: "🌎 "; }
+
+    /* ── BLOQUE DE REFLEXIÓN (colapsable) ── */
+    .reflexion {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 18px;
+      transition: background 0.35s;
+    }
+    .reflexion-pregunta {
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .reflexion-pregunta::before { content: "💭"; }
+    .ver-explicacion {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--accent);
+      cursor: pointer;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+    .explicacion {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .explicacion.abierta { max-height: 600px; }
+    .explicacion-inner {
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 0.5px solid var(--border);
+      color: var(--text-dim);
+      font-size: 14.5px;
+    }
+
+    /* ── BLOQUE DE CÓDIGO (seleccionable + botón copiar) ── */
+    .code-block {
+      background: var(--code-bg);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+    .code-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      border-bottom: 0.5px solid rgba(255,255,255,0.06);
+    }
+    .code-file {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--text-dim);
+    }
+    .copy-btn {
+      background: transparent;
+      border: 0.5px solid var(--border);
+      color: var(--text-dim);
+      font-size: 11.5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .code-block pre {
+      padding: 14px 16px;
+      overflow-x: auto;
+      user-select: text;               /* protección: código SÍ seleccionable */
+    }
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--code-text);
+      user-select: text;
+    }
+    .code-block pre, .code-block code { -webkit-user-select: text; }
+
+    /* ── AVISO DE COPYRIGHT (tarjeta seria) ── */
+    .aviso-copyright {
+      border-left: 3px solid var(--accent);
+      background: var(--surface);
+      border-radius: 0;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+    }
+    .aviso-titulo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .aviso-copyright p { font-size: 13px; color: var(--text-dim); margin: 0; }
+
+    /* ── PIE DE PÁGINA ── */
+    .footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 0.5px solid var(--border);
+      font-size: 12px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    /* ── MARCA DE AGUA FIJA ── */
+    .watermark {
+      position: fixed;
+      bottom: 14px;
+      right: 16px;
+      font-size: 11px;
+      color: var(--text-dim);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 50;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── BOTONES FLOTANTES (toggle tema + modo presentación) ── */
+    .controls {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+      z-index: 60;
+    }
+    .ctrl-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 0.5px solid var(--border);
+      background: var(--surface-2);
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.25s;
+    }
+    .ctrl-btn:hover { border-color: var(--accent); }
+
+    /* ── BARRA DE PROGRESO ── */
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: var(--accent);
+      width: 0%;
+      z-index: 70;
+      transition: width 0.15s;
+    }
+
+    /* ── MODO PRESENTACIÓN ── */
+    body.presentacion .sidebar,
+    body.presentacion .watermark,
+    body.presentacion .controls { display: none; }
+    body.presentacion .seccion { display: none; }
+    body.presentacion .seccion.slide-activa {
+      display: block;
+      min-height: 80vh;
+      animation: fadeIn 0.3s ease;
+    }
+    body.presentacion .content-column { max-width: 940px; padding-top: 80px; }
+    body.presentacion .clase-header { display: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .slide-hint {
+      display: none;
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--text-dim);
+      background: var(--surface);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 0.5px solid var(--border);
+      z-index: 60;
+    }
+    body.presentacion .slide-hint { display: block; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 0.5px solid var(--border); }
+      .content-column { padding: 32px 0 60px; }
+      .clase-titulo { font-size: 27px; }
+      .watermark { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- ============================================================
-     AVISO LEGAL — Ver también el comentario en <head>.
-     © 2026 Ana Alvarado. Material de autoría exclusiva.
-     ============================================================ -->
+  <div class="progress-bar" id="progressBar"></div>
 
-<button class="mobile-toggle" id="mobileToggle" aria-label="Abrir menú">☰</button>
+  <!-- CONTROLES FIJOS -->
+  <div class="controls">
+    <button class="ctrl-btn" id="temaBtn" aria-label="Cambiar tema claro u oscuro" title="Claro / oscuro">☀️</button>
+    <button class="ctrl-btn" id="presentBtn" aria-label="Modo presentación" title="Modo presentación (P)">▢</button>
+  </div>
 
-<div class="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="brand-mark">🐾</div>
-      <div class="brand-text">
-        <div class="t1">VetCare</div>
-        <div class="t2">Módulo 4 · Clase 2</div>
-      </div>
-    </div>
+  <div class="layout">
 
-    <div class="progress-wrap">
-      <div class="progress-label"><span>Progreso</span><span id="progressPct">0%</span></div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-    </div>
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar">
+      <!-- ┌──────────────────────────────────────────────────────────┐
+           │  HUECO 3 · NAVEGACIÓN                                      │
+           └──────────────────────────────────────────────────────────┘ -->
+      <div class="sidebar-brand">Java Backend Developer</div>
+      <div class="sidebar-sub">Módulo 4 · Clase 3</div>
+      <nav id="nav">
+        <a class="nav-item active" href="#sec-1"><span class="nav-icon">🔓</span> El problema</a>
+        <a class="nav-item" href="#sec-2"><span class="nav-icon">🧩</span> Autenticar vs autorizar</a>
+        <a class="nav-item" href="#sec-3"><span class="nav-icon">👤</span> Usuario y roles</a>
+        <a class="nav-item" href="#sec-4"><span class="nav-icon">🔒</span> Contraseñas seguras</a>
+        <a class="nav-item" href="#sec-5"><span class="nav-icon">⚙️</span> Dependencias</a>
+        <a class="nav-item" href="#sec-6"><span class="nav-icon">📝</span> Registro</a>
+        <a class="nav-item" href="#sec-7"><span class="nav-icon">🎫</span> Qué es un JWT</a>
+        <a class="nav-item" href="#sec-8"><span class="nav-icon">🏭</span> JwtService</a>
+        <a class="nav-item" href="#sec-9"><span class="nav-icon">👥</span> UserDetailsService</a>
+        <a class="nav-item" href="#sec-10"><span class="nav-icon">🚦</span> El filtro JWT</a>
+        <a class="nav-item" href="#sec-11"><span class="nav-icon">🛡️</span> SecurityConfig</a>
+        <a class="nav-item" href="#sec-12"><span class="nav-icon">🔑</span> Login con token</a>
+        <a class="nav-item" href="#sec-13"><span class="nav-icon">🧪</span> Probar el flujo</a>
+        <a class="nav-item" href="#sec-14"><span class="nav-icon">👮</span> Roles en acción</a>
+        <a class="nav-item" href="#sec-15"><span class="nav-icon">🧹</span> Errores limpios</a>
+        <a class="nav-item" href="#sec-16"><span class="nav-icon">🚀</span> Reto</a>
+      </nav>
+    </aside>
 
-    <nav class="toc" id="toc">
-      <!-- generado por JS -->
-    </nav>
+    <!-- CONTENIDO -->
+    <main class="content-area">
+      <div class="content-column">
 
-    <div class="sidebar-footer">
-      Java AI Engineer — Dev Senior<br>
-      <button class="present-btn" id="presentBtn">🖥️ Modo presentación</button>
-    </div>
-  </aside>
+        <!-- ENCABEZADO -->
+        <header class="clase-header">
+          <div class="clase-kicker">Java Backend Developer · Módulo 4</div>
+          <h1 class="clase-titulo">Seguridad con JWT: login, roles y protección de endpoints</h1>
+        </header>
 
-  <main id="main">
-
-    <!-- ============================== PORTADA ============================== -->
-    <section class="section cover" id="s0" data-title="Bienvenida" data-icon="🐾">
-      <div class="cover-kicker">Proyecto oficial del programa · Dev Senior</div>
-      <h1>CRUD completo, <span>DTOs</span> y Swagger<br>en el sistema VetCare</h1>
-      <p class="sub">Clínica veterinaria gestionada con Spring Boot, PostgreSQL y JPA. Hoy conectamos las 4 entidades del sistema con operaciones reales, contratos de datos limpios y una API documentada sola.</p>
-      <div class="meta-row">
-        <span class="step-chip">⏱️ <b>3 horas</b> en vivo</span>
-        <span class="step-chip">🎓 Nivel <b>intermedio</b></span>
-        <span class="step-chip">🧩 Stack: <b>Spring Boot · PostgreSQL · JPA</b></span>
-        <span class="step-chip">🔐 JWT llega en <b>Clase 3</b></span>
-      </div>
-
-      <div class="copyright-card" style="max-width:760px;">
-        <div class="ttl">© Aviso de derechos de autor</div>
-        <p>Este material es de <strong>autoría exclusiva de Ana Alvarado</strong> y su acceso está limitado a las y los estudiantes de esta cohorte. <strong>Queda prohibida su reproducción, redistribución o uso fuera de clase sin autorización escrita de la autora.</strong></p>
-      </div>
-    </section>
-
-    <!-- ============================== 1. RECORDATORIO ============================== -->
-    <section class="section" id="s1" data-title="Recordatorio: Clase 1" data-icon="🔁">
-      <div class="eyebrow">Contexto previo</div>
-      <h1 class="section-title"><span class="icon">🔁</span>¿Dónde quedamos en la Clase 1?</h1>
-      <p class="section-sub">Antes de avanzar, repasemos el punto de partida: el proyecto conectado a PostgreSQL y las 4 entidades con sus relaciones ya definidas.</p>
-
-      <div class="grid-3">
-        <div class="stat-card"><div class="num">4</div><div class="lbl">Entidades: Dueño, Mascota, Cita, Veterinario</div></div>
-        <div class="stat-card"><div class="num">1</div><div class="lbl">Endpoint existente: <code class="inline">GET /api/duenos</code></div></div>
-        <div class="stat-card"><div class="num">[ ]</div><div class="lbl">La API todavía no devolvía datos reales</div></div>
-      </div>
-
-      <div class="tip-banner">
-        <span class="emoji">🌉</span>
-        <p>Hoy llenamos ese arreglo vacío con datos reales y le damos las 4 operaciones del CRUD a cada entidad.</p>
-      </div>
-
-      <h2 class="block-title">🧬 Las entidades tal como quedaron</h2>
-      <p>Estas son las 4 clases de dominio (mapeadas con JPA) sobre las que vamos a trabajar hoy. Ya tienen sus relaciones definidas y el manejo de recursión resuelto con <code class="inline">@JsonIgnore</code> en el lado "muchos".</p>
-
-      <div class="code-wrap">
-        <div class="code-file">📄 src/main/java/com/devsenior/vetcare/model/Dueno.java</div>
-        <div class="code-block" data-code-id="c-dueno"><span class="kw">package</span> com.devsenior.vetcare.model;
-
-<span class="kw">import</span> com.fasterxml.jackson.annotation.JsonIgnore;
-<span class="kw">import</span> jakarta.persistence.*;
-<span class="kw">import</span> lombok.Data;
-<span class="kw">import</span> lombok.NoArgsConstructor;
-<span class="kw">import</span> lombok.AllArgsConstructor;
-<span class="kw">import</span> java.util.List;
-
-<span class="an">@Entity</span>
-<span class="an">@Table</span>(name = <span class="str">"duenos"</span>)
-<span class="an">@Data</span>
-<span class="an">@NoArgsConstructor</span>
-<span class="an">@AllArgsConstructor</span>
-<span class="kw">public class</span> <span class="cls">Dueno</span> {
-
-    <span class="an">@Id</span>
-    <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
-    <span class="kw">private</span> Long id;
-
-    <span class="kw">private</span> String nombre;
-    <span class="kw">private</span> String apellido;
-    <span class="kw">private</span> String documento;
-    <span class="kw">private</span> String telefono;
-    <span class="kw">private</span> String email;
-
-    <span class="cm">// evita la recursión infinita al serializar a JSON</span>
-    <span class="an">@JsonIgnore</span>
-    <span class="an">@OneToMany</span>(mappedBy = <span class="str">"dueno"</span>, cascade = CascadeType.ALL, orphanRemoval = <span class="kw">true</span>)
-    <span class="kw">private</span> List&lt;Mascota&gt; mascotas;
-}</div>
-        <button class="copy-btn" data-copy-target="c-dueno">📋 Copiar</button>
-      </div>
-
-      <div class="grid-2">
-        <div class="code-wrap">
-          <div class="code-file">📄 model/Mascota.java</div>
-          <div class="code-block" data-code-id="c-mascota"><span class="an">@Entity</span>
-<span class="an">@Table</span>(name = <span class="str">"mascotas"</span>)
-<span class="an">@Data</span> <span class="an">@NoArgsConstructor</span> <span class="an">@AllArgsConstructor</span>
-<span class="kw">public class</span> <span class="cls">Mascota</span> {
-
-    <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
-    <span class="kw">private</span> Long id;
-
-    <span class="kw">private</span> String nombre;
-    <span class="kw">private</span> String especie;
-    <span class="kw">private</span> String raza;
-    <span class="kw">private</span> Integer edad;
-
-    <span class="an">@ManyToOne</span>
-    <span class="an">@JoinColumn</span>(name = <span class="str">"dueno_id"</span>)
-    <span class="kw">private</span> Dueno dueno;
-
-    <span class="an">@JsonIgnore</span>
-    <span class="an">@OneToMany</span>(mappedBy = <span class="str">"mascota"</span>, cascade = CascadeType.ALL, orphanRemoval = <span class="kw">true</span>)
-    <span class="kw">private</span> List&lt;Cita&gt; citas;
-}</div>
-          <button class="copy-btn" data-copy-target="c-mascota">📋 Copiar</button>
+        <!-- AVISO DE COPYRIGHT (fijo) -->
+        <div class="aviso-copyright">
+          <div class="aviso-titulo">© AVISO DE DERECHOS DE AUTOR</div>
+          <p>Este material es de <strong>autoría exclusiva de Ana Alvarado</strong> y su acceso está limitado a las y los <strong>estudiantes de esta cohorte</strong>. Queda prohibida su reproducción, redistribución o uso fuera de clase sin autorización escrita de la autora.</p>
         </div>
 
-        <div class="code-wrap">
-          <div class="code-file">📄 model/Veterinario.java</div>
-          <div class="code-block" data-code-id="c-vet"><span class="an">@Entity</span>
-<span class="an">@Table</span>(name = <span class="str">"veterinarios"</span>)
-<span class="an">@Data</span> <span class="an">@NoArgsConstructor</span> <span class="an">@AllArgsConstructor</span>
-<span class="kw">public class</span> <span class="cls">Veterinario</span> {
+        <!-- ┌────────────────────────────────────────────────────────────┐
+             │  HUECO 4 · SECCIONES DE CONTENIDO                            │
+             └────────────────────────────────────────────────────────────┘ -->
 
-    <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
-    <span class="kw">private</span> Long id;
+        <!-- ═══════════ SECCIÓN 1 ═══════════ -->
+        <section class="seccion slide-activa" id="sec-1">
+          <div class="seccion-numero">01 · EL PROBLEMA</div>
+          <h2>🔓 Tu API está abierta de par en par</h2>
 
-    <span class="kw">private</span> String nombre;
-    <span class="kw">private</span> String especialidad;
-    <span class="kw">private</span> String tarjetaProfesional;
+          <p>Ya construiste VetCare: registra dueños, mascotas, agenda citas. Funciona. Pero tiene un hueco grave: <strong>ahora mismo cualquiera</strong> que conozca la dirección de tu API puede borrar todas las citas, cambiar teléfonos o eliminar dueños. No hay ninguna puerta.</p>
 
-    <span class="an">@JsonIgnore</span>
-    <span class="an">@OneToMany</span>(mappedBy = <span class="str">"veterinario"</span>)
-    <span class="kw">private</span> List&lt;Cita&gt; citas;
-}</div>
-          <button class="copy-btn" data-copy-target="c-vet">📋 Copiar</button>
-        </div>
-      </div>
+          <p>En una clínica real hay una recepcionista que entra con su usuario, y un administrador con más permisos. No cualquiera toca el sistema. Hoy le pones <strong>la llave</strong> a VetCare.</p>
 
-      <div class="code-wrap">
-        <div class="code-file">📄 model/Cita.java</div>
-        <div class="code-block" data-code-id="c-cita"><span class="an">@Entity</span>
-<span class="an">@Table</span>(name = <span class="str">"citas"</span>)
-<span class="an">@Data</span> <span class="an">@NoArgsConstructor</span> <span class="an">@AllArgsConstructor</span>
-<span class="kw">public class</span> <span class="cls">Cita</span> {
+          <div class="tip">
+            <div class="tip-label">Lo que lograrás hoy</div>
+            <p>Registro y login con contraseñas encriptadas · un token JWT al entrar · endpoints protegidos · roles ADMIN/USER · y un cierre pro: convertir ese feo error 500 en un 404 limpio.</p>
+          </div>
 
-    <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
-    <span class="kw">private</span> Long id;
+          <div class="reflexion">
+            <div class="reflexion-pregunta">Si mañana subes esta API a internet tal como está, ¿qué podría hacer un desconocido que encuentre la dirección?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">Mucho más que ver: podría <strong>borrar</strong> todas las citas, <strong>cambiar</strong> los datos de cualquier dueño, <strong>eliminar</strong> veterinarios. Sin seguridad, la API está abierta. Hoy resuelves dos preguntas: <strong>¿quién eres?</strong> (autenticación) y <strong>¿qué te dejo hacer?</strong> (autorización).</div>
+            </div>
+          </div>
+        </section>
 
-    <span class="kw">private</span> LocalDate fecha;
-    <span class="kw">private</span> String motivo;
-    <span class="kw">private</span> String estado;
-    <span class="kw">private</span> Double costo;
+        <!-- ═══════════ SECCIÓN 2 ═══════════ -->
+        <section class="seccion" id="sec-2">
+          <div class="seccion-numero">02 · CONCEPTO</div>
+          <h2>🧩 Autenticación vs. autorización</h2>
 
-    <span class="an">@ManyToOne</span>
-    <span class="an">@JoinColumn</span>(name = <span class="str">"mascota_id"</span>)
-    <span class="kw">private</span> Mascota mascota;
+          <p>Estos dos términos se repetirán toda la clase y se confunden mucho. Sepáralos bien desde ya:</p>
 
-    <span class="an">@ManyToOne</span>
-    <span class="an">@JoinColumn</span>(name = <span class="str">"veterinario_id"</span>)
-    <span class="kw">private</span> Veterinario veterinario;
-}</div>
-        <button class="copy-btn" data-copy-target="c-cita">📋 Copiar</button>
-      </div>
+          <div class="definicion">
+            <p class="tecnica"><strong>Autenticación:</strong> el proceso de verificar <strong>quién eres</strong>. Ocurre al hacer login: das usuario y contraseña, y el sistema confirma tu identidad.</p>
+            <p class="real">Mostrar tu cédula en la entrada de un edificio: demuestras que eres tú.</p>
+          </div>
 
-      <div class="tip-banner">
-        <span class="emoji">💡</span>
-        <p>Nota que <code class="inline">@JsonIgnore</code> siempre va en el lado <strong>"muchos"</strong> (la lista). Es el parche que usábamos hasta hoy para cortar la recursión — más adelante lo reemplazamos por DTOs.</p>
-      </div>
-    </section>
+          <div class="definicion">
+            <p class="tecnica"><strong>Autorización:</strong> el proceso de decidir <strong>qué puedes hacer</strong> una vez identificado. Ocurre en cada petición protegida, según tu rol.</p>
+            <p class="real">El color de tu escarapela dice a qué salas puedes entrar. Ya estás adentro, pero no a todo tienes acceso.</p>
+          </div>
 
-    <!-- ============================== 2. OBJETIVOS ============================== -->
-    <section class="section" id="s2" data-title="Objetivos de hoy" data-icon="🎯">
-      <div class="eyebrow">Meta de la clase</div>
-      <h1 class="section-title"><span class="icon">🎯</span>¿Qué logramos hoy?</h1>
-      <p class="section-sub">Al terminar esta clase, el sistema VetCare va a funcionar de punta a punta: desde registrar un dueño hasta agendar una cita con su veterinario.</p>
+          <div class="reflexion">
+            <div class="reflexion-pregunta">Un empleado tiene su usuario y clave correctos y entra al sistema. ¿Eso significa que puede hacer TODO adentro?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">No. Entrar (autenticación) y tener permiso para todo (autorización) son cosas distintas. Una recepcionista entra con su clave válida, pero <strong>no debería poder borrar</strong> registros: eso es solo del administrador. Autenticado no es lo mismo que autorizado para todo.</div>
+            </div>
+          </div>
+        </section>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">✅ CRUD completo</div>
-          <p style="margin:0;">Crear, leer, actualizar y eliminar para las 4 entidades del sistema.</p>
-        </div>
-        <div class="card">
-          <div class="card-title">✅ DTOs</div>
-          <p style="margin:0;">Contratos limpios que separan lo que entra/sale de la API de lo que se persiste en la base.</p>
-        </div>
-        <div class="card">
-          <div class="card-title">✅ Swagger UI</div>
-          <p style="margin:0;">Documentación interactiva para probar toda la API con clics, sin Postman ni curl.</p>
-        </div>
-        <div class="card">
-          <div class="card-title">✅ Relaciones al recibir datos</div>
-          <p style="margin:0;">Crear una mascota ligada a su dueño, y una cita ligada a mascota y veterinario.</p>
-        </div>
-      </div>
+        <!-- ═══════════ SECCIÓN 3 ═══════════ -->
+        <section class="seccion" id="sec-3">
+          <div class="seccion-numero">03 · MODELO</div>
+          <h2>👤 La entidad Usuario y sus roles</h2>
 
-      <div class="tip-banner">
-        <span class="emoji">💡</span>
-        <p>La mayoría de lo técnico de hoy (CRUD, <code class="inline">@RequestBody</code>, <code class="inline">@PathVariable</code>, códigos HTTP) ya se vio en módulos anteriores. Las dos herramientas nuevas son <strong>DTOs</strong> (con <code class="inline">record</code>) y <strong>Swagger</strong>.</p>
-      </div>
-    </section>
+          <p>Para que alguien haga login, primero tiene que <strong>existir</strong> como usuario en la base. Necesitas una entidad nueva: <strong>Usuario</strong>. Es independiente, separada de Veterinario o Dueño.</p>
 
-    <!-- ============================== 3. SWAGGER ============================== -->
-    <section class="section" id="s3" data-title="Swagger UI" data-icon="🛠️">
-      <div class="eyebrow">Herramienta profesional</div>
-      <h1 class="section-title"><span class="icon">🛠️</span>Swagger: documentación que nunca miente</h1>
-      <p class="section-sub">El navegador solo sabe hacer <code class="inline">GET</code>. Para probar POST, PUT y DELETE sin instalar Postman, incrustamos Swagger UI dentro de la propia aplicación.</p>
+          <div class="tip">
+            <div class="tip-label">Decisión de diseño</div>
+            <p>¿Por qué un Usuario aparte y no reutilizar Veterinario? Porque <strong>quien usa el software</strong> (una recepcionista, un admin) no es lo mismo que un dato del negocio (un veterinario que atiende). El Usuario es de quien <em>entra</em>; el Veterinario es de quien <em>atiende</em>. Cada cosa en su lugar.</p>
+          </div>
 
-      <p class="lead">Swagger lee los controladores y genera una página interactiva donde cada endpoint es un botón ejecutable. Es el estándar de la industria para documentar y probar una API.</p>
+          <p>El rol no puede ser cualquier texto ("admin", "administrador", "ADMIN"…). Para evitar errores de escritura, lo defines como un <strong>enum</strong>: una lista cerrada de valores válidos.</p>
 
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>¿Por qué preferimos una herramienta que se genera sola desde el código, en lugar de documentar la API a mano?</div>
-        <button class="reveal-btn" data-reveal="q1">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q1">Porque un documento manual se <strong>desactualiza</strong> apenas cambia un endpoint. Swagger lee el código en vivo: si agregas un endpoint, aparece solo; si cambia un parámetro, se refleja al instante. La documentación nunca miente porque <strong>es el código mismo</strong>.</div>
-      </div>
+          <div class="definicion">
+            <p class="tecnica"><strong>enum:</strong> un tipo que define un conjunto fijo y cerrado de valores posibles. Solo se puede usar uno de los que están en la lista.</p>
+            <p class="real">Es como el menú de un restaurante: solo puedes pedir lo que está en la carta, nada por fuera.</p>
+          </div>
 
-      <h2 class="block-title">📦 Paso A — Agregar la dependencia</h2>
-      <p>En <code class="inline">pom.xml</code>, dentro de <code class="inline">&lt;dependencies&gt;</code>, agrega una sola dependencia — no necesita configuración adicional.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/model/Rol.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.model;
 
-      <div class="code-wrap">
-        <div class="code-file">📄 pom.xml</div>
-        <div class="code-block" data-code-id="c-pom"><span class="an">&lt;dependency&gt;</span>
-    <span class="an">&lt;groupId&gt;</span>org.springdoc<span class="an">&lt;/groupId&gt;</span>
-    <span class="an">&lt;artifactId&gt;</span>springdoc-openapi-starter-webmvc-ui<span class="an">&lt;/artifactId&gt;</span>
-    <span class="an">&lt;version&gt;</span>2.8.5<span class="an">&lt;/version&gt;</span>
-<span class="an">&lt;/dependency&gt;</span></div>
-        <button class="copy-btn" data-copy-target="c-pom">📋 Copiar</button>
-      </div>
+public enum Rol {
+    ADMIN,
+    USER
+}</code></pre>
+          </div>
 
-      <div class="tip-banner">
-        <span class="emoji">📌</span>
-        <p>Usamos la serie <strong>2.8.x</strong> porque es la compatible con Spring Boot 3.x. Si más adelante suben la versión de Spring Boot, revisen la matriz de compatibilidad en springdoc.org.</p>
-      </div>
+          <p>Ahora la entidad, con Lombok igual que las demás. El <strong>username</strong> es único (no puede haber dos iguales) y el rol se guarda como texto legible gracias a <code>@Enumerated(EnumType.STRING)</code>.</p>
 
-      <h2 class="block-title">🚀 Paso B — Recargar y levantar</h2>
-      <div class="step-chip">1. Guardar <b>pom.xml</b> y sincronizar</div>
-      <div class="step-chip">2. <b>./mvnw clean install</b></div>
-      <div class="step-chip">3. <b>./mvnw spring-boot:run</b></div>
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/model/Usuario.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.model;
 
-      <h2 class="block-title">🌐 Paso C — Abrir Swagger UI</h2>
-      <p>Abre el navegador en <code class="inline">http://localhost:8080/swagger-ui.html</code>. Vas a ver <strong>DuenoController</strong> con su único endpoint <code class="inline">GET /api/duenos</code> de la clase pasada — vivo y documentado solo, sin escribir una línea de documentación.</p>
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-      <h3 class="sub-title">🐛 Errores comunes en este punto</h3>
-      <table class="error-table">
-        <thead><tr><th>Error</th><th>Qué significa</th><th>Solución</th></tr></thead>
-        <tbody>
-          <tr><td><code class="inline">Whitelabel Error Page</code></td><td>Ruta mal escrita o dependencia no recargada</td><td>Verifica la URL exacta y reinicia con <code class="inline">clean install</code></td></tr>
-          <tr><td>Carga sin endpoints</td><td>La app arrancó antes de sincronizar el pom.xml</td><td>Detén, corre <code class="inline">clean install</code>, vuelve a levantar</td></tr>
-          <tr><td><code class="inline">Failed to load API definition</code></td><td>Error de arranque previo en consola</td><td>Revisa la consola: el error real está más arriba</td></tr>
-        </tbody>
-      </table>
-    </section>
+@Entity
+@Table(name = "usuarios")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Usuario {
 
-    <!-- ============================== 4. DTOs ============================== -->
-    <section class="section" id="s4" data-title="DTOs: el problema" data-icon="🎁">
-      <div class="eyebrow">Diseño de API</div>
-      <h1 class="section-title"><span class="icon">🎁</span>DTOs: el contrato limpio de la API</h1>
-      <p class="section-sub">Hasta ahora usábamos <code class="inline">@JsonIgnore</code> como parche para evitar la recursión infinita. Hoy vemos la solución profesional.</p>
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-      <p class="lead">Un <strong>DTO</strong> (Data Transfer Object) es un objeto simple que representa exactamente los datos que viajan por la API, ni más ni menos. La entidad vive puertas adentro (habla con la base); el DTO es lo que sale a la calle.</p>
+    @Column(nullable = false, unique = true)
+    private String username;
 
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>Al registrar un dueño, ¿el cliente de la API debería enviar el <code class="inline">id</code>? ¿Y la lista completa de mascotas en el mismo formulario?</div>
-        <button class="reveal-btn" data-reveal="q2">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q2">No. El <code class="inline">id</code> lo genera la base, no el cliente. Y las mascotas se registran por su propio endpoint, no dentro del dueño. Si expones la entidad tal cual, aceptas datos que no deberías y filtras estructura interna. El DTO define un contrato limpio: <strong>"para crear un dueño, mándame solo estos campos"</strong>.</div>
-      </div>
+    @Column(nullable = false)
+    private String password;
 
-      <div class="real-life">
-        <span class="lbl">💼 Vida real</span>
-        La <strong>entidad</strong> es tu historia clínica completa en el hospital. El <strong>DTO</strong> es el formulario de admisión: solo piden nombre, documento y teléfono. Cada cosa expone lo justo.
-      </div>
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Rol rol;
+}</code></pre>
+          </div>
 
-      <h2 class="block-title">📐 Dos tipos de DTO</h2>
-      <table>
-        <thead><tr><th>DTO</th><th>Dirección</th><th>Para qué sirve</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Request</strong></td><td>entra (cliente → API)</td><td>define qué campos acepto al crear/actualizar</td></tr>
-          <tr><td><strong>Response</strong></td><td>sale (API → cliente)</td><td>define qué campos devuelvo, sin recursión</td></tr>
-        </tbody>
-      </table>
-    </section>
+          <p>Y el repositorio, que necesita buscar un usuario <strong>por su username</strong> (cuando intenta entrar). Spring Data te regala esa consulta con solo declarar el método: no escribes SQL, el nombre basta.</p>
 
-    <!-- ============================== 5. RECORD ============================== -->
-    <section class="section" id="s5" data-title="record en Java" data-icon="🧱">
-      <div class="eyebrow">Herramienta del lenguaje</div>
-      <h1 class="section-title"><span class="icon">🧱</span>¿Qué es un <code class="inline">record</code>?</h1>
-      <p class="section-sub">Para escribir los DTOs usamos una forma corta de declarar una clase cuyo único propósito es transportar datos: una cajita con campos, sin lógica adentro.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/repository/UsuarioRepository.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.repository;
 
-      <h2 class="block-title">🔍 Una línea, cuatro cosas gratis</h2>
-      <p>Cuando escribimos esto:</p>
-      <div class="code-wrap">
-        <div class="code-block" data-code-id="c-record"><span class="kw">public record</span> <span class="cls">DuenoResponse</span>(Long id, String nombre) {}</div>
-        <button class="copy-btn" data-copy-target="c-record">📋 Copiar</button>
-      </div>
-      <p>Java genera, por detrás y automáticamente:</p>
-      <div class="grid-2">
-        <div class="card"><div class="card-title">🏗️ Constructor</div><p style="margin:0;">Recibe <code class="inline">id</code> y <code class="inline">nombre</code>.</p></div>
-        <div class="card"><div class="card-title">📖 Lectores</div><p style="margin:0;">Métodos <code class="inline">id()</code> y <code class="inline">nombre()</code> — sin el prefijo <code class="inline">get</code>.</p></div>
-        <div class="card"><div class="card-title">⚖️ equals / hashCode / toString</div><p style="margin:0;">Ya implementados, sin escribirlos.</p></div>
-        <div class="card"><div class="card-title">🔒 Inmutabilidad</div><p style="margin:0;">Una vez creado el objeto, sus valores no cambian.</p></div>
-      </div>
+import com.devsenior.vetcare.model.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
-      <h2 class="block-title">🆚 Entidad vs. DTO</h2>
-      <table>
-        <thead><tr><th></th><th>Entidad (clase + Lombok)</th><th>DTO (record)</th></tr></thead>
-        <tbody>
-          <tr><td>Para qué</td><td>Mapear una tabla, vive con JPA</td><td>Transportar datos por la API</td></tr>
-          <tr><td>Leer un campo</td><td><code class="inline">dueno.getNombre()</code></td><td><code class="inline">request.nombre()</code></td></tr>
-          <tr><td>¿Cambian sus datos?</td><td>Sí, tiene setters</td><td>No, es inmutable</td></tr>
-          <tr><td>Palabra clave</td><td><code class="inline">class</code></td><td><code class="inline">record</code></td></tr>
-        </tbody>
-      </table>
+public interface UsuarioRepository extends JpaRepository&lt;Usuario, Long&gt; {
+    Optional&lt;Usuario&gt; findByUsername(String username);
+}</code></pre>
+          </div>
 
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>Si <code class="inline">record</code> es tan corto y práctico, ¿por qué no reemplazamos también las entidades por records?</div>
-        <button class="reveal-btn" data-reveal="q3">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q3">Porque JPA necesita <strong>modificar</strong> la entidad (asignarle el id que genera la base, cambiar campos) y necesita un constructor vacío. Un <code class="inline">record</code> es inmutable y no tiene constructor vacío, así que no sirve como entidad. En cambio es perfecto para un DTO, que solo lleva datos de ida y vuelta.</div>
-      </div>
+          <div class="reflexion">
+            <div class="reflexion-pregunta">¿Por qué el username lo marcamos como único, pero el password no?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">El username es tu <strong>identidad</strong> de acceso: si hubiera dos "laura", el sistema no sabría a cuál dejar entrar. La contraseña sí puede repetirse entre personas distintas (por casualidad) y además va encriptada, así que no importa. Lo único que te identifica es el username.</div>
+            </div>
+          </div>
+        </section>
 
-      <div class="tip-banner">
-        <span class="emoji">🔑</span>
-        <p><strong>Regla simple:</strong> entidad → <code class="inline">class</code> con Lombok. DTO → <code class="inline">record</code>.</p>
-      </div>
-    </section>
+        <!-- ═══════════ SECCIÓN 4 ═══════════ -->
+        <section class="seccion" id="sec-4">
+          <div class="seccion-numero">04 · SEGURIDAD</div>
+          <h2>🔒 Nunca guardes contraseñas en texto plano</h2>
 
-    <!-- ============================== 6. CRUD DUEÑO ============================== -->
-    <section class="section" id="s6" data-title="CRUD de Dueño" data-icon="🐾">
-      <div class="eyebrow">Primera entidad · independiente</div>
-      <h1 class="section-title"><span class="icon">🐾</span>CRUD completo de Dueño</h1>
-      <p class="section-sub">Dueño es una entidad "independiente": no depende de otra para existir. Con ella construimos el patrón completo que después repetimos en las demás.</p>
+          <p>Esta es una de las lecciones de seguridad más importantes de todo el programa. Presta atención.</p>
 
-      <h2 class="block-title">📦 DTOs de Dueño</h2>
-      <p>El <strong>Request</strong> no lleva <code class="inline">id</code> (lo pone la base) ni la lista de mascotas. Trae validaciones de Bean Validation.</p>
+          <p>Si guardas la contraseña <strong>tal cual la escribió el usuario</strong> ("clave123") en la base, y algún día alguien roba la base (pasa <em>todo el tiempo</em> en la vida real), tendría <strong>todas las contraseñas de todos</strong> en texto legible. Un desastre.</p>
 
-      <div class="grid-2">
-        <div class="code-wrap">
-          <div class="code-file">📄 dto/DuenoRequest.java</div>
-          <div class="code-block" data-code-id="c-duenoreq"><span class="kw">package</span> com.devsenior.vetcare.dto;
+          <p>La solución: guardas una versión <strong>encriptada e irreversible</strong>, usando un algoritmo llamado <strong>BCrypt</strong>.</p>
 
-<span class="kw">import</span> jakarta.validation.constraints.Email;
-<span class="kw">import</span> jakarta.validation.constraints.NotBlank;
+          <div class="definicion">
+            <p class="tecnica"><strong>BCrypt:</strong> función de hash de una sola vía para contraseñas. Permite <em>verificar</em> si una clave coincide, pero no permite <em>revertir</em> el texto guardado a la clave original.</p>
+            <p class="real">Es como triturar un papel: puedes comparar si dos papeles se trituraron igual, pero no puedes rearmar el papel original a partir de los pedacitos.</p>
+          </div>
 
-<span class="kw">public record</span> <span class="cls">DuenoRequest</span>(
-        <span class="an">@NotBlank</span>(message = <span class="str">"El nombre es obligatorio"</span>)
-        String nombre,
+          <p>Cuando el usuario pone <code>clave123</code>, en la base <strong>no</strong> se guarda <code>clave123</code>. Se guarda algo así:</p>
 
-        <span class="an">@NotBlank</span>(message = <span class="str">"El apellido es obligatorio"</span>)
-        String apellido,
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">así se ve en la base de datos</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>$2a$10$N9qo8uLOickgx2ZMRZoM-eIjZAgcfl7p92ldGxad68L...</code></pre>
+          </div>
 
-        <span class="an">@NotBlank</span>(message = <span class="str">"El documento es obligatorio"</span>)
-        String documento,
+          <p>Ese texto es <strong>irreversible</strong>. En el login, BCrypt toma la clave escrita, la vuelve a triturar y <strong>compara triturado contra triturado</strong>. Nunca compara texto plano.</p>
 
-        String telefono,
+          <div class="reflexion">
+            <div class="reflexion-pregunta">Si el administrador de la base abre la tabla de usuarios, ¿debería poder leer la contraseña real de sus empleados?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">No, ni siquiera él. Una contraseña bien guardada <strong>nadie</strong> puede leerla. Se guarda encriptada con BCrypt, que es de una sola vía: se puede verificar ("¿esta clave coincide?") pero no revertir ("¿cuál era la clave?"). Así, aunque roben la base, las contraseñas siguen protegidas.</div>
+            </div>
+          </div>
+        </section>
 
-        <span class="an">@Email</span>(message = <span class="str">"El email debe ser válido"</span>)
-        String email
-) {}</div>
-          <button class="copy-btn" data-copy-target="c-duenoreq">📋 Copiar</button>
-        </div>
+        <!-- ═══════════ SECCIÓN 5 ═══════════ -->
+        <section class="seccion" id="sec-5">
+          <div class="seccion-numero">05 · CONFIGURACIÓN</div>
+          <h2>⚙️ Las dependencias de seguridad y JWT</h2>
 
-        <div class="code-wrap">
-          <div class="code-file">📄 dto/DuenoResponse.java</div>
-          <div class="code-block" data-code-id="c-duenores"><span class="kw">package</span> com.devsenior.vetcare.dto;
+          <p>Hasta ahora tu <code>pom.xml</code> no sabe nada de seguridad. Necesitas agregar <strong>dos cosas</strong>: Spring Security (el sistema de seguridad) y jjwt (la librería para crear y leer tokens).</p>
 
-<span class="kw">public record</span> <span class="cls">DuenoResponse</span>(
-        Long id,
-        String nombre,
-        String apellido,
-        String documento,
-        String telefono,
-        String email
-) {}</div>
-          <button class="copy-btn" data-copy-target="c-duenores">📋 Copiar</button>
-        </div>
-      </div>
+          <h3>Spring Security</h3>
+          <p>Enciende toda la maquinaria de seguridad. <strong>Apenas la agregas, Spring bloquea TODA la API por defecto</strong> y pide login. Eso es a propósito: es "seguro por defecto", y después tú decides qué abrir.</p>
 
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>¿Por qué el <code class="inline">DuenoResponse</code> sí lleva <code class="inline">id</code> pero el <code class="inline">DuenoRequest</code> no?</div>
-        <button class="reveal-btn" data-reveal="q4">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q4">El <code class="inline">id</code> lo genera la <strong>base de datos</strong>, no el cliente. Al crear (Request) el dueño todavía no tiene id. Al responder (Response) ya existe en la base y el cliente lo necesita para futuras operaciones. Cada DTO expone solo lo que corresponde a su momento.</div>
-      </div>
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">pom.xml · dentro de &lt;dependencies&gt;</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+          </div>
 
-      <h2 class="block-title">🧩 Service: la conversión vive aquí</h2>
-      <div class="tip-banner">
-        <span class="emoji">🔑</span>
-        <p>Decisión de diseño: la conversión entre entidad y DTO la hace el propio <code class="inline">ServiceImpl</code>, con dos métodos privados (<code class="inline">toEntity</code> y <code class="inline">toResponse</code>). No creamos una clase aparte: convertir es parte del trabajo del servicio, respetando la arquitectura de 4 capas (Interface → Repository → ServiceImpl → Controller).</p>
-      </div>
+          <h3>Las tres dependencias de jjwt</h3>
+          <p>La librería jjwt (Java JWT) viene <strong>partida en tres</strong> piezas, y entender por qué te evita errores:</p>
 
-      <div class="code-wrap">
-        <div class="code-file">📄 service/DuenoService.java</div>
-        <div class="code-block" data-code-id="c-duenoiface"><span class="kw">public interface</span> <span class="cls">DuenoService</span> {
-    List&lt;DuenoResponse&gt; listarTodos();
-    DuenoResponse buscarPorId(Long id);
-    DuenoResponse crear(DuenoRequest request);
-    DuenoResponse actualizar(Long id, DuenoRequest request);
-    <span class="kw">void</span> eliminar(Long id);
-}</div>
-        <button class="copy-btn" data-copy-target="c-duenoiface">📋 Copiar</button>
-      </div>
+          <div class="definicion">
+            <p class="tecnica"><strong>jjwt-api:</strong> las interfaces, lo que escribes en tu código. <strong>jjwt-impl:</strong> la implementación real por detrás (va como <code>runtime</code>). <strong>jjwt-gson:</strong> convierte el contenido del token a/desde JSON (también <code>runtime</code>).</p>
+            <p class="real">Es como un control remoto: tú tocas los botones (api), pero por dentro hay circuitos que hacen el trabajo (impl) y una batería que lo alimenta al usarlo (runtime).</p>
+          </div>
 
-      <p>Cuando alguien busca un dueño que no existe, no devolvemos <code class="inline">null</code> en silencio: lanzamos una excepción propia que más adelante (Clase 3) se traduce en un 404 limpio.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">pom.xml · dentro de &lt;dependencies&gt;</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-api&lt;/artifactId&gt;
+    &lt;version&gt;0.12.5&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-impl&lt;/artifactId&gt;
+    &lt;version&gt;0.12.5&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-gson&lt;/artifactId&gt;
+    &lt;version&gt;0.12.5&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+          </div>
 
-      <div class="code-wrap">
-        <div class="code-file">📄 exception/RecursoNoEncontradoException.java</div>
-        <div class="code-block" data-code-id="c-exc"><span class="kw">public class</span> <span class="cls">RecursoNoEncontradoException</span> <span class="kw">extends</span> RuntimeException {
-    <span class="kw">public</span> RecursoNoEncontradoException(String mensaje) {
-        <span class="kw">super</span>(mensaje);
+          <div class="tip">
+            <div class="tip-label">Error clásico</div>
+            <p>Si olvidas <code>jjwt-impl</code>, el proyecto <strong>compila</strong> pero al arrancar <strong>truena</strong> con "no implementation found". Por eso las tres van juntas.</p>
+          </div>
+
+          <div class="reflexion">
+            <div class="reflexion-pregunta">¿Por qué jjwt-impl y jjwt-gson van con scope runtime y jjwt-api no?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">Porque tu <strong>código</strong> solo habla con jjwt-api (las interfaces): eso lo necesitas al escribir y compilar. La implementación y el conversor JSON solo hacen falta cuando la app <strong>está corriendo</strong>. <code>runtime</code> significa exactamente eso: "no la necesito para compilar, solo para ejecutar". No expones la implementación al código que escribes.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 6 ═══════════ -->
+        <section class="seccion" id="sec-6">
+          <div class="seccion-numero">06 · REGISTRO</div>
+          <h2>📝 Crear cuenta con clave encriptada</h2>
+
+          <p>Primero, dile a Spring <strong>con qué</strong> encriptar. Defines un <strong>PasswordEncoder</strong> (el triturador de papel) como un <code>@Bean</code>, para usarlo en todo el proyecto.</p>
+
+          <div class="definicion">
+            <p class="tecnica"><strong>@Bean:</strong> un objeto que Spring crea una sola vez y te presta donde lo pidas. Vive en una clase de configuración.</p>
+            <p class="real">Es como una herramienta compartida en un taller: hay una sola, y quien la necesita la toma prestada en vez de comprar una nueva cada vez.</p>
+          </div>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/config/SecurityConfig.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
-}</div>
-        <button class="copy-btn" data-copy-target="c-exc">📋 Copiar</button>
-      </div>
+}</code></pre>
+          </div>
 
-      <div class="code-wrap">
-        <div class="code-file">📄 service/impl/DuenoServiceImpl.java</div>
-        <div class="code-block" data-code-id="c-duenoimpl"><span class="kw">package</span> com.devsenior.vetcare.service.impl;
+          <p>Ahora los DTOs de autenticación, con <code>record</code> como siempre. Uno para registrarse, uno para entrar, y uno para devolver el token.</p>
 
-<span class="kw">import</span> com.devsenior.vetcare.dto.DuenoRequest;
-<span class="kw">import</span> com.devsenior.vetcare.dto.DuenoResponse;
-<span class="kw">import</span> com.devsenior.vetcare.exception.RecursoNoEncontradoException;
-<span class="kw">import</span> com.devsenior.vetcare.model.Dueno;
-<span class="kw">import</span> com.devsenior.vetcare.repository.DuenoRepository;
-<span class="kw">import</span> com.devsenior.vetcare.service.DuenoService;
-<span class="kw">import</span> org.springframework.stereotype.Service;
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/dto/RegistroRequest.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.dto;
 
-<span class="kw">import</span> java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import com.devsenior.vetcare.model.Rol;
 
-<span class="an">@Service</span>
-<span class="kw">public class</span> <span class="cls">DuenoServiceImpl</span> <span class="kw">implements</span> DuenoService {
+public record RegistroRequest(
+        @NotBlank(message = "El username es obligatorio")
+        String username,
 
-    <span class="kw">private final</span> DuenoRepository duenoRepository;
+        @NotBlank(message = "El password es obligatorio")
+        String password,
 
-    <span class="kw">public</span> DuenoServiceImpl(DuenoRepository duenoRepository) {
-        <span class="kw">this</span>.duenoRepository = duenoRepository;
+        @NotNull(message = "El rol es obligatorio")
+        Rol rol
+) {}</code></pre>
+          </div>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/dto/LoginRequest.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.dto;
+
+import jakarta.validation.constraints.NotBlank;
+
+public record LoginRequest(
+        @NotBlank(message = "El username es obligatorio")
+        String username,
+
+        @NotBlank(message = "El password es obligatorio")
+        String password
+) {}</code></pre>
+          </div>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/dto/AuthResponse.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.dto;
+
+public record AuthResponse(
+        String token
+) {}</code></pre>
+          </div>
+
+          <p>El contrato del servicio: registrar y hacer login. Ambos, al final, devuelven un token.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/service/AuthService.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.service;
+
+import com.devsenior.vetcare.dto.AuthResponse;
+import com.devsenior.vetcare.dto.LoginRequest;
+import com.devsenior.vetcare.dto.RegistroRequest;
+
+public interface AuthService {
+    AuthResponse registrar(RegistroRequest request);
+    AuthResponse login(LoginRequest request);
+}</code></pre>
+          </div>
+
+          <div class="tip">
+            <div class="tip-label">Construimos en capas</div>
+            <p>El registro lo implementas ya. El login y el token real los completas más adelante, cuando exista el JwtService. Nada queda sin explicar.</p>
+          </div>
+
+          <div class="reflexion">
+            <div class="reflexion-pregunta">Al guardar el usuario, ¿por qué llamamos a passwordEncoder.encode(...) en vez de guardar el password directo?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">Porque el password que llega es la clave <strong>en texto plano</strong> tal como la escribió el usuario. Si la guardas así, queda legible en la base (peligrosísimo). <code>encode(...)</code> la <strong>tritura con BCrypt</strong> antes de guardar. Nunca, jamás, se persiste una contraseña sin encriptar. Es la regla de oro.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 7 ═══════════ -->
+        <section class="seccion" id="sec-7">
+          <div class="seccion-numero">07 · CONCEPTO</div>
+          <h2>🎫 ¿Qué es un JWT y cómo se lee?</h2>
+
+          <p>Cuando alguien hace login correcto, ¿cómo le das una "llave" para que en las siguientes peticiones el sistema sepa que ya se identificó, <strong>sin volver a pedirle la clave cada vez</strong>?</p>
+
+          <div class="definicion">
+            <p class="tecnica"><strong>JWT (JSON Web Token):</strong> un texto que el servidor <strong>firma</strong> y le entrega al cliente al autenticarse. En cada petición siguiente, el cliente lo muestra y el servidor verifica la firma para dejarlo pasar.</p>
+            <p class="real">Es la manilla de un concierto: muestras tu cédula una vez en la entrada (login) y te ponen una manilla firmada. Adentro ya no muestras la cédula en cada puerta, solo la manilla.</p>
+          </div>
+
+          <p>Un JWT es un texto largo con <strong>tres partes separadas por puntos</strong>:</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">estructura de un token (header.payload.firma)</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsYXVyYSIsInJvbCI6IkFETUlOIn0.dBjftJeZ4CVP-mB92K27u...</code></pre>
+          </div>
+
+          <p><strong>Parte 1 (Header):</strong> qué algoritmo firma el token. <strong>Parte 2 (Payload):</strong> los datos, ej. "el usuario es laura, rol ADMIN". No es secreto, cualquiera lo lee. <strong>Parte 3 (Firma):</strong> el sello de seguridad, calculado con una clave secreta que solo el servidor conoce.</p>
+
+          <div class="reflexion">
+            <div class="reflexion-pregunta">Si el contenido del token lo puede leer cualquiera, ¿no es peligroso? ¿Cómo evitamos que alguien se invente un token diciendo que es ADMIN?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">El token <strong>no se esconde, se firma</strong>. Cualquiera puede leer que dice "rol ADMIN", pero nadie puede falsificarlo sin la clave secreta del servidor. Si alguien cambia una letra del payload, la firma <strong>ya no cuadra</strong> y el servidor lo rechaza. Es como un billete: puedes verlo, pero no puedes imprimir uno falso que pase la prueba de autenticidad.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 8 ═══════════ -->
+        <section class="seccion" id="sec-8">
+          <div class="seccion-numero">08 · IMPLEMENTACIÓN</div>
+          <h2>🏭 El JwtService: crear y validar tokens</h2>
+
+          <p>Este es el archivo más importante de la clase. El <strong>JwtService</strong> es la fábrica de tokens: sabe <strong>crear</strong> un token cuando alguien entra, y <strong>leer y validar</strong> un token cuando alguien vuelve.</p>
+
+          <div class="tip">
+            <div class="tip-label">Atención: cambio de sintaxis</div>
+            <p>La librería jjwt cambió en la versión 0.12.x. Si ves código viejo con <code>setSubject(...)</code> o <code>parserBuilder()</code>, <strong>no compila aquí</strong>. La forma nueva usa <code>subject(...)</code>, <code>verifyWith(...)</code>, <code>parseSignedClaims(...)</code> y <code>Jwts.SIG.HS256</code>. Usa el de esta guía.</p>
+          </div>
+
+          <p>Primero, la clave secreta va en <code>application.properties</code>, junto al tiempo de expiración.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/resources/application.properties · agregar al final</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code># Clave secreta para firmar los JWT (en produccion iria en variable de entorno)
+jwt.secret=EstaEsUnaClaveSecretaMuyLargaParaVetCare2026SeguridadJWT
+# Duracion del token en milisegundos (aqui, 24 horas)
+jwt.expiration=86400000</code></pre>
+          </div>
+
+          <div class="tip">
+            <div class="tip-label">Ojo</div>
+            <p>La clave debe ser <strong>larga</strong> (mínimo 32 caracteres para HS256). Si es corta, jjwt lanza un error al arrancar.</p>
+          </div>
+
+          <p>Ahora el servicio completo. Léelo por partes: la clave, generar el token, y leer/validar.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/service/JwtService.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.service;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+@Service
+public class JwtService {
+
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration}")
+    private long expiration;
+
+    // Convierte el texto secreto en la llave que usa jjwt para firmar
+    private SecretKey getKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    <span class="an">@Override</span>
-    <span class="kw">public</span> List&lt;DuenoResponse&gt; listarTodos() {
-        <span class="kw">return</span> duenoRepository.findAll()
-                .stream()
-                .map(<span class="kw">this</span>::toResponse)
-                .toList();
+    // Crea un token con el username, el rol, y su fecha de vencimiento
+    public String generarToken(UserDetails userDetails, String rol) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .claim("rol", rol)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getKey())
+                .compact();
     }
 
-    <span class="an">@Override</span>
-    <span class="kw">public</span> DuenoResponse buscarPorId(Long id) {
-        Dueno dueno = duenoRepository.findById(id)
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe un dueño con id "</span> + id));
-        <span class="kw">return</span> toResponse(dueno);
+    // Saca el username que viaja dentro del token
+    public String extraerUsername(String token) {
+        return extraerClaims(token).getSubject();
     }
 
-    <span class="an">@Override</span>
-    <span class="kw">public</span> DuenoResponse crear(DuenoRequest request) {
-        Dueno dueno = toEntity(request);
-        Dueno guardado = duenoRepository.save(dueno);
-        <span class="kw">return</span> toResponse(guardado);
+    // Verifica firma + vencimiento leyendo el contenido del token
+    private Claims extraerClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
-    <span class="an">@Override</span>
-    <span class="kw">public</span> DuenoResponse actualizar(Long id, DuenoRequest request) {
-        Dueno dueno = duenoRepository.findById(id)
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe un dueño con id "</span> + id));
+    // El token es valido si el username coincide y no esta vencido
+    public boolean esValido(String token, UserDetails userDetails) {
+        String username = extraerUsername(token);
+        boolean vencido = extraerClaims(token).getExpiration().before(new Date());
+        return username.equals(userDetails.getUsername()) &amp;&amp; !vencido;
+    }
+}</code></pre>
+          </div>
 
-        dueno.setNombre(request.nombre());
-        dueno.setApellido(request.apellido());
-        dueno.setDocumento(request.documento());
-        dueno.setTelefono(request.telefono());
-        dueno.setEmail(request.email());
+          <div class="reflexion">
+            <div class="reflexion-pregunta">En esValido verificamos dos cosas: que el username coincida Y que no esté vencido. ¿Por qué no basta con solo verificar la firma?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">La firma prueba que el token es <strong>auténtico</strong> (lo hicimos nosotros), pero no que siga siendo <strong>vigente ni del usuario correcto</strong>. Un token robado y <strong>vencido</strong> no debe entrar: por eso revisamos la expiración. Y confirmamos que el username corresponda al usuario. Autenticidad, vigencia e identidad: las tres.</div>
+            </div>
+          </div>
+        </section>
 
-        Dueno actualizado = duenoRepository.save(dueno);
-        <span class="kw">return</span> toResponse(actualizado);
+        <!-- ═══════════ SECCIÓN 9 ═══════════ -->
+        <section class="seccion" id="sec-9">
+          <div class="seccion-numero">09 · PUENTE</div>
+          <h2>👥 UserDetailsService: conectar tus usuarios con Spring Security</h2>
+
+          <p>Spring Security no conoce tu tabla <code>usuarios</code>. Trabaja con su propio "molde" de usuario, llamado <code>UserDetails</code>. Necesitas un <strong>traductor</strong>: una clase que, dado un username, busque en TU base y le entregue a Spring un <code>UserDetails</code> que entienda.</p>
+
+          <div class="definicion">
+            <p class="tecnica"><strong>UserDetailsService:</strong> la interface de Spring Security cuyo método <code>loadUserByUsername</code> carga un usuario desde donde tú quieras (tu base) y lo entrega en el formato que Spring maneja.</p>
+            <p class="real">Es como un intérprete de idiomas: tu base habla "español" (entidad Usuario) y Spring habla "inglés" (UserDetails); el traductor los pone de acuerdo.</p>
+          </div>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/service/UsuarioDetailsService.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.service;
+
+import com.devsenior.vetcare.model.Usuario;
+import com.devsenior.vetcare.repository.UsuarioRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UsuarioDetailsService implements UserDetailsService {
+
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioDetailsService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
 
-    <span class="an">@Override</span>
-    <span class="kw">public void</span> eliminar(Long id) {
-        <span class="kw">if</span> (!duenoRepository.existsById(id)) {
-            <span class="kw">throw new</span> RecursoNoEncontradoException(<span class="str">"No existe un dueño con id "</span> + id);
-        }
-        duenoRepository.deleteById(id);
-    }
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -&gt; new UsernameNotFoundException(
+                        "Usuario no encontrado: " + username));
 
-    <span class="cm">// --- Conversión DTO &lt;-&gt; entidad (privados, solo los usa este servicio) ---</span>
-
-    <span class="kw">private</span> Dueno toEntity(DuenoRequest request) {
-        Dueno dueno = <span class="kw">new</span> Dueno();
-        dueno.setNombre(request.nombre());
-        dueno.setApellido(request.apellido());
-        dueno.setDocumento(request.documento());
-        dueno.setTelefono(request.telefono());
-        dueno.setEmail(request.email());
-        <span class="kw">return</span> dueno;
-    }
-
-    <span class="kw">private</span> DuenoResponse toResponse(Dueno dueno) {
-        <span class="kw">return new</span> DuenoResponse(
-                dueno.getId(),
-                dueno.getNombre(),
-                dueno.getApellido(),
-                dueno.getDocumento(),
-                dueno.getTelefono(),
-                dueno.getEmail()
+        return new User(
+                usuario.getUsername(),
+                usuario.getPassword(),   // ya viene encriptada de la base
+                List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()))
         );
     }
-}</div>
-        <button class="copy-btn" data-copy-target="c-duenoimpl">📋 Copiar</button>
-      </div>
+}</code></pre>
+          </div>
 
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>En <code class="inline">actualizar</code>, ¿por qué primero busco el dueño en la base en vez de crear uno nuevo con el id y guardarlo directo?</div>
-        <button class="reveal-btn" data-reveal="q5">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q5">Si creo uno nuevo, piso los campos que no venían en el request (por ejemplo, dejaría sus mascotas huérfanas o borraría datos). Al traer el existente y modificar solo sus campos, conservo lo demás intacto. Además, si el id no existe, me entero y lanzo el 404. Es la forma segura de actualizar.</div>
-      </div>
+          <div class="reflexion">
+            <div class="reflexion-pregunta">¿Por qué le agregamos el prefijo ROLE_ al rol (queda ROLE_ADMIN) en vez de dejarlo como ADMIN a secas?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">Spring Security tiene una <strong>convención</strong>: internamente espera que los roles empiecen con <code>ROLE_</code>. Cuando más adelante escribas <code>hasRole("ADMIN")</code>, Spring le agrega solito el <code>ROLE_</code> y busca <code>ROLE_ADMIN</code>. Si no sigues la convención al guardar la autoridad, los permisos <strong>no cuadran</strong> y nada funciona.</div>
+            </div>
+          </div>
+        </section>
 
-      <h2 class="block-title">🌐 Controller: verbos y códigos HTTP</h2>
-      <table>
-        <thead><tr><th>Acción</th><th>Verbo</th><th>Ruta</th><th>Código de éxito</th></tr></thead>
-        <tbody>
-          <tr><td>Listar todos</td><td><span class="badge get">GET</span></td><td><code class="inline">/api/duenos</code></td><td>200 OK</td></tr>
-          <tr><td>Buscar uno</td><td><span class="badge get">GET</span></td><td><code class="inline">/api/duenos/{id}</code></td><td>200 OK</td></tr>
-          <tr><td>Crear</td><td><span class="badge post">POST</span></td><td><code class="inline">/api/duenos</code></td><td>201 Created</td></tr>
-          <tr><td>Actualizar</td><td><span class="badge put">PUT</span></td><td><code class="inline">/api/duenos/{id}</code></td><td>200 OK</td></tr>
-          <tr><td>Eliminar</td><td><span class="badge delete">DELETE</span></td><td><code class="inline">/api/duenos/{id}</code></td><td>204 No Content</td></tr>
-        </tbody>
-      </table>
+        <!-- ═══════════ SECCIÓN 10 ═══════════ -->
+        <section class="seccion" id="sec-10">
+          <div class="seccion-numero">10 · IMPLEMENTACIÓN</div>
+          <h2>🚦 El filtro JWT: el portero de cada petición</h2>
 
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>¿Por qué crear devuelve 201 y no simplemente 200? ¿Y por qué eliminar devuelve 204 (sin contenido)?</div>
-        <button class="reveal-btn" data-reveal="q6">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q6">Cada código cuenta una historia al cliente: <strong>201 Created</strong> dice "creé algo nuevo" — más preciso que un genérico 200. <strong>204 No Content</strong> dice "lo borré, no tengo nada que devolverte". Usar el código correcto es parte de diseñar una API REST profesional: el cliente sabe qué pasó solo por el número.</div>
-      </div>
+          <p>Necesitas algo que <strong>intercepte CADA petición</strong> que llega, mire si trae un token, lo valide, y si es correcto le diga a Spring "este usuario ya está identificado". Ese portero es un <strong>filtro</strong>.</p>
 
-      <div class="code-wrap">
-        <div class="code-file">📄 controller/DuenoController.java</div>
-        <div class="code-block" data-code-id="c-duenoctrl"><span class="kw">package</span> com.devsenior.vetcare.controller;
+          <div class="definicion">
+            <p class="tecnica"><strong>OncePerRequestFilter:</strong> un filtro de Spring que se ejecuta exactamente una vez por cada petición HTTP, ideal para revisar el token antes de que la petición llegue a tu controlador.</p>
+            <p class="real">Es el portero de una discoteca: revisa la manilla de cada persona que entra, una sola vez, en la puerta.</p>
+          </div>
 
-<span class="kw">import</span> com.devsenior.vetcare.dto.DuenoRequest;
-<span class="kw">import</span> com.devsenior.vetcare.dto.DuenoResponse;
-<span class="kw">import</span> com.devsenior.vetcare.service.DuenoService;
-<span class="kw">import</span> jakarta.validation.Valid;
-<span class="kw">import</span> org.springframework.http.HttpStatus;
-<span class="kw">import</span> org.springframework.http.ResponseEntity;
-<span class="kw">import</span> org.springframework.web.bind.annotation.*;
+          <p>Su trabajo: mira si viene el header <code>Authorization</code> con un token (<code>Bearer xxxxx</code>), saca el username, valida, y si todo cuadra marca al usuario como <strong>autenticado</strong> para esa petición.</p>
 
-<span class="kw">import</span> java.util.List;
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/config/JwtFilter.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.config;
 
-<span class="an">@RestController</span>
-<span class="an">@RequestMapping</span>(<span class="str">"/api/duenos"</span>)
-<span class="kw">public class</span> <span class="cls">DuenoController</span> {
+import com.devsenior.vetcare.service.JwtService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-    <span class="kw">private final</span> DuenoService duenoService;
+import java.io.IOException;
 
-    <span class="kw">public</span> DuenoController(DuenoService duenoService) {
-        <span class="kw">this</span>.duenoService = duenoService;
+@Component
+public class JwtFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
     }
 
-    <span class="an">@GetMapping</span>
-    <span class="kw">public</span> ResponseEntity&lt;List&lt;DuenoResponse&gt;&gt; listarTodos() {
-        <span class="kw">return</span> ResponseEntity.ok(duenoService.listarTodos());
-    }
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-    <span class="an">@GetMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;DuenoResponse&gt; buscarPorId(<span class="an">@PathVariable</span> Long id) {
-        <span class="kw">return</span> ResponseEntity.ok(duenoService.buscarPorId(id));
-    }
+        String header = request.getHeader("Authorization");
 
-    <span class="an">@PostMapping</span>
-    <span class="kw">public</span> ResponseEntity&lt;DuenoResponse&gt; crear(<span class="an">@Valid</span> <span class="an">@RequestBody</span> DuenoRequest request) {
-        DuenoResponse creado = duenoService.crear(request);
-        <span class="kw">return</span> ResponseEntity.status(HttpStatus.CREATED).body(creado);
-    }
-
-    <span class="an">@PutMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;DuenoResponse&gt; actualizar(
-            <span class="an">@PathVariable</span> Long id,
-            <span class="an">@Valid</span> <span class="an">@RequestBody</span> DuenoRequest request) {
-        <span class="kw">return</span> ResponseEntity.ok(duenoService.actualizar(id, request));
-    }
-
-    <span class="an">@DeleteMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;Void&gt; eliminar(<span class="an">@PathVariable</span> Long id) {
-        duenoService.eliminar(id);
-        <span class="kw">return</span> ResponseEntity.noContent().build();
-    }
-}</div>
-        <button class="copy-btn" data-copy-target="c-duenoctrl">📋 Copiar</button>
-      </div>
-
-      <h2 class="block-title">🧪 Probar en Swagger</h2>
-      <p>Reinicia la app, abre Swagger y ejecuta las 4 operaciones en orden.</p>
-
-      <div class="code-wrap">
-        <div class="code-file">POST /api/duenos</div>
-        <div class="code-block" data-code-id="c-duenojson">{
-  <span class="str">"nombre"</span>: <span class="str">"Juan"</span>,
-  <span class="str">"apellido"</span>: <span class="str">"Pérez"</span>,
-  <span class="str">"documento"</span>: <span class="str">"1020304050"</span>,
-  <span class="str">"telefono"</span>: <span class="str">"3001234567"</span>,
-  <span class="str">"email"</span>: <span class="str">"juan.perez@correo.com"</span>
-}</div>
-        <button class="copy-btn" data-copy-target="c-duenojson">📋 Copiar</button>
-      </div>
-
-      <div class="step-chip">1. <b>POST</b> → 201 con el dueño creado y su id</div>
-      <div class="step-chip">2. <b>GET</b> lista → ya no está vacía</div>
-      <div class="step-chip">3. <b>GET /1</b> → devuelve a Juan</div>
-      <div class="step-chip">4. <b>PUT /1</b> → 200 con el teléfono actualizado</div>
-      <div class="step-chip">5. <b>DELETE /1</b> → 204 sin cuerpo</div>
-
-      <div class="tip-banner">
-        <span class="emoji">✅</span>
-        <p>Vuelve a crear a Juan antes de seguir: lo necesitamos para registrar mascotas en el siguiente bloque.</p>
-      </div>
-
-      <h3 class="sub-title">🐛 Errores comunes</h3>
-      <table class="error-table">
-        <thead><tr><th>Error</th><th>Qué significa</th><th>Solución</th></tr></thead>
-        <tbody>
-          <tr><td><code class="inline">400 Bad Request</code></td><td>Falló una validación (falta nombre, email inválido)</td><td>Revisa que los campos <code class="inline">@NotBlank</code> no vayan vacíos</td></tr>
-          <tr><td><code class="inline">500</code> al buscar un id inexistente</td><td>Se lanzó la excepción sin manejo global todavía</td><td>Es esperado hoy; en Clase 3 se convierte en 404 limpio</td></tr>
-          <tr><td>El email no valida</td><td>El texto no tiene formato de correo</td><td>Usa un correo con <code class="inline">@</code> y dominio, ej. <code class="inline">x@y.com</code></td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- ============================== 7. CRUD MASCOTA ============================== -->
-    <section class="section" id="s7" data-title="CRUD de Mascota" data-icon="🐶">
-      <div class="eyebrow">Segunda entidad · con relación</div>
-      <h1 class="section-title"><span class="icon">🐶</span>CRUD de Mascota: la primera relación</h1>
-      <p class="section-sub">Una mascota nunca existe sola: siempre pertenece a un dueño. Aquí aparece el reto real de esta clase: manejar relaciones al recibir datos.</p>
-
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>Para registrar la mascota de Juan, ¿hay que volver a escribir todo el nombre, documento y teléfono de Juan?</div>
-        <button class="reveal-btn" data-reveal="q7">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q7">No. Solo se necesita <strong>el id de Juan</strong>. Juan ya está en la base. En el request de la mascota se manda <code class="inline">duenoId: 1</code>, y el backend busca a Juan y lo asocia. No se repiten datos: se <strong>referencia por id</strong>. Así funcionan las relaciones en las APIs reales.</div>
-      </div>
-
-      <!-- SVG relación Dueño -> Mascota -->
-      <svg class="flow-diagram" viewBox="0 0 760 150" xmlns="http://www.w3.org/2000/svg">
-        <rect x="20" y="45" width="200" height="60" rx="12" fill="#1D1730" stroke="#6018F0" stroke-width="1.5"/>
-        <text x="120" y="70" text-anchor="middle" fill="#F3F0FA" font-size="14" font-weight="700">👤 Dueño</text>
-        <text x="120" y="90" text-anchor="middle" fill="#B3A7CF" class="mono" font-size="11">id = 1</text>
-
-        <path d="M220 75 L 330 75" stroke="#6018F0" stroke-width="2" marker-end="url(#arrow1)"/>
-        <text x="275" y="62" text-anchor="middle" fill="#B58CF5" class="mono" font-size="10.5">duenoId: 1</text>
-
-        <rect x="340" y="45" width="220" height="60" rx="12" fill="#1D1730" stroke="#6018F0" stroke-width="1.5"/>
-        <text x="450" y="66" text-anchor="middle" fill="#F3F0FA" font-size="14" font-weight="700">🐶 Mascota (request)</text>
-        <text x="450" y="88" text-anchor="middle" fill="#B3A7CF" class="mono" font-size="10.5">nombre, especie, duenoId</text>
-
-        <path d="M560 75 L 640 75" stroke="#34D399" stroke-width="2" marker-end="url(#arrow2)"/>
-
-        <rect x="640" y="45" width="100" height="60" rx="12" fill="#1D1730" stroke="#34D399" stroke-width="1.5"/>
-        <text x="690" y="70" text-anchor="middle" fill="#F3F0FA" font-size="13" font-weight="700">201</text>
-        <text x="690" y="88" text-anchor="middle" fill="#34D399" class="mono" font-size="10">Created</text>
-
-        <defs>
-          <marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#6018F0"/></marker>
-          <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#34D399"/></marker>
-        </defs>
-      </svg>
-
-      <h2 class="block-title">📦 DTOs de Mascota</h2>
-      <div class="grid-2">
-        <div class="code-wrap">
-          <div class="code-file">📄 dto/MascotaRequest.java</div>
-          <div class="code-block" data-code-id="c-mreq"><span class="kw">package</span> com.devsenior.vetcare.dto;
-
-<span class="kw">import</span> jakarta.validation.constraints.NotBlank;
-<span class="kw">import</span> jakarta.validation.constraints.NotNull;
-
-<span class="kw">public record</span> <span class="cls">MascotaRequest</span>(
-        <span class="an">@NotBlank</span>(message = <span class="str">"El nombre es obligatorio"</span>)
-        String nombre,
-
-        <span class="an">@NotBlank</span>(message = <span class="str">"La especie es obligatoria"</span>)
-        String especie,
-
-        String raza,
-        Integer edad,
-
-        <span class="an">@NotNull</span>(message = <span class="str">"El id del dueño es obligatorio"</span>)
-        Long duenoId
-) {}</div>
-          <button class="copy-btn" data-copy-target="c-mreq">📋 Copiar</button>
-        </div>
-
-        <div class="code-wrap">
-          <div class="code-file">📄 dto/MascotaResponse.java</div>
-          <div class="code-block" data-code-id="c-mres"><span class="kw">package</span> com.devsenior.vetcare.dto;
-
-<span class="kw">public record</span> <span class="cls">MascotaResponse</span>(
-        Long id,
-        String nombre,
-        String especie,
-        String raza,
-        Integer edad,
-        Long duenoId,
-        String duenoNombre
-) {}</div>
-          <button class="copy-btn" data-copy-target="c-mres">📋 Copiar</button>
-        </div>
-      </div>
-
-      <div class="tip-banner">
-        <span class="emoji">🔑</span>
-        <p>Aquí muere la recursión, sin <code class="inline">@JsonIgnore</code>. El Response es plano: strings y números. No hay objetos anidados que se puedan enrollar.</p>
-      </div>
-
-      <h2 class="block-title">🧩 Service: valida antes de guardar</h2>
-      <p>El service de Mascota usa <strong>dos repositorios</strong>: Mascota (para guardar) y Dueño (para verificar que exista). Nunca se guarda una mascota huérfana.</p>
-
-      <div class="code-wrap">
-        <div class="code-file">📄 service/impl/MascotaServiceImpl.java</div>
-        <div class="code-block" data-code-id="c-mimpl"><span class="an">@Service</span>
-<span class="kw">public class</span> <span class="cls">MascotaServiceImpl</span> <span class="kw">implements</span> MascotaService {
-
-    <span class="kw">private final</span> MascotaRepository mascotaRepository;
-    <span class="kw">private final</span> DuenoRepository duenoRepository;
-
-    <span class="kw">public</span> MascotaServiceImpl(MascotaRepository mascotaRepository,
-                              DuenoRepository duenoRepository) {
-        <span class="kw">this</span>.mascotaRepository = mascotaRepository;
-        <span class="kw">this</span>.duenoRepository = duenoRepository;
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> List&lt;MascotaResponse&gt; listarTodos() {
-        <span class="kw">return</span> mascotaRepository.findAll().stream().map(<span class="kw">this</span>::toResponse).toList();
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> MascotaResponse buscarPorId(Long id) {
-        Mascota mascota = mascotaRepository.findById(id)
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe una mascota con id "</span> + id));
-        <span class="kw">return</span> toResponse(mascota);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> MascotaResponse crear(MascotaRequest request) {
-        Dueno dueno = duenoRepository.findById(request.duenoId())
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe un dueño con id "</span> + request.duenoId()));
-
-        Mascota mascota = <span class="kw">new</span> Mascota();
-        mascota.setNombre(request.nombre());
-        mascota.setEspecie(request.especie());
-        mascota.setRaza(request.raza());
-        mascota.setEdad(request.edad());
-        mascota.setDueno(dueno);
-
-        Mascota guardada = mascotaRepository.save(mascota);
-        <span class="kw">return</span> toResponse(guardada);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> MascotaResponse actualizar(Long id, MascotaRequest request) {
-        Mascota mascota = mascotaRepository.findById(id)
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe una mascota con id "</span> + id));
-
-        Dueno dueno = duenoRepository.findById(request.duenoId())
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe un dueño con id "</span> + request.duenoId()));
-
-        mascota.setNombre(request.nombre());
-        mascota.setEspecie(request.especie());
-        mascota.setRaza(request.raza());
-        mascota.setEdad(request.edad());
-        mascota.setDueno(dueno);
-
-        Mascota actualizada = mascotaRepository.save(mascota);
-        <span class="kw">return</span> toResponse(actualizada);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public void</span> eliminar(Long id) {
-        <span class="kw">if</span> (!mascotaRepository.existsById(id)) {
-            <span class="kw">throw new</span> RecursoNoEncontradoException(<span class="str">"No existe una mascota con id "</span> + id);
+        // Si no hay header o no empieza con "Bearer ", seguimos sin autenticar
+        if (header == null || !header.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
-        mascotaRepository.deleteById(id);
-    }
 
-    <span class="cm">// --- Conversión a DTO de respuesta ---</span>
-    <span class="kw">private</span> MascotaResponse toResponse(Mascota mascota) {
-        Dueno dueno = mascota.getDueno();
-        String nombreCompleto = dueno.getNombre() + <span class="str">" "</span> + dueno.getApellido();
-        <span class="kw">return new</span> MascotaResponse(
-                mascota.getId(), mascota.getNombre(), mascota.getEspecie(),
-                mascota.getRaza(), mascota.getEdad(),
-                dueno.getId(), nombreCompleto
-        );
-    }
-}</div>
-        <button class="copy-btn" data-copy-target="c-mimpl">📋 Copiar</button>
-      </div>
+        String token = header.substring(7);          // quita "Bearer "
+        String username = jwtService.extraerUsername(token);
 
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>¿Qué pasaría en la vida real si se permitiera registrar una mascota con un <code class="inline">duenoId</code> que no existe?</div>
-        <button class="reveal-btn" data-reveal="q8">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q8">Tendríamos una mascota <strong>fantasma</strong>: sin dueño real, imposible de contactar, rompiendo la integridad del sistema. En la clínica sería un perro registrado sin saber de quién es. Por eso se valida la existencia del dueño <strong>antes de guardar</strong> — esa es lógica de negocio, y por eso vive en el service.</div>
-      </div>
+        if (username != null
+                &amp;&amp; SecurityContextHolder.getContext().getAuthentication() == null) {
 
-      <h2 class="block-title">🌐 Controller de Mascota</h2>
-      <div class="code-wrap">
-        <div class="code-file">📄 controller/MascotaController.java</div>
-        <div class="code-block" data-code-id="c-mctrl"><span class="an">@RestController</span>
-<span class="an">@RequestMapping</span>(<span class="str">"/api/mascotas"</span>)
-<span class="kw">public class</span> <span class="cls">MascotaController</span> {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-    <span class="kw">private final</span> MascotaService mascotaService;
-
-    <span class="kw">public</span> MascotaController(MascotaService mascotaService) {
-        <span class="kw">this</span>.mascotaService = mascotaService;
-    }
-
-    <span class="an">@GetMapping</span>
-    <span class="kw">public</span> ResponseEntity&lt;List&lt;MascotaResponse&gt;&gt; listarTodos() {
-        <span class="kw">return</span> ResponseEntity.ok(mascotaService.listarTodos());
-    }
-
-    <span class="an">@GetMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;MascotaResponse&gt; buscarPorId(<span class="an">@PathVariable</span> Long id) {
-        <span class="kw">return</span> ResponseEntity.ok(mascotaService.buscarPorId(id));
-    }
-
-    <span class="an">@PostMapping</span>
-    <span class="kw">public</span> ResponseEntity&lt;MascotaResponse&gt; crear(<span class="an">@Valid</span> <span class="an">@RequestBody</span> MascotaRequest request) {
-        MascotaResponse creada = mascotaService.crear(request);
-        <span class="kw">return</span> ResponseEntity.status(HttpStatus.CREATED).body(creada);
-    }
-
-    <span class="an">@PutMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;MascotaResponse&gt; actualizar(
-            <span class="an">@PathVariable</span> Long id, <span class="an">@Valid</span> <span class="an">@RequestBody</span> MascotaRequest request) {
-        <span class="kw">return</span> ResponseEntity.ok(mascotaService.actualizar(id, request));
-    }
-
-    <span class="an">@DeleteMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;Void&gt; eliminar(<span class="an">@PathVariable</span> Long id) {
-        mascotaService.eliminar(id);
-        <span class="kw">return</span> ResponseEntity.noContent().build();
-    }
-}</div>
-        <button class="copy-btn" data-copy-target="c-mctrl">📋 Copiar</button>
-      </div>
-
-      <h2 class="block-title">🧪 Probar la relación en Swagger</h2>
-      <p>Con Juan (dueño <code class="inline">id = 1</code>) ya creado, registremos a su mascota:</p>
-      <div class="code-wrap">
-        <div class="code-file">POST /api/mascotas</div>
-        <div class="code-block" data-code-id="c-mjson">{
-  <span class="str">"nombre"</span>: <span class="str">"Firulais"</span>,
-  <span class="str">"especie"</span>: <span class="str">"PERRO"</span>,
-  <span class="str">"raza"</span>: <span class="str">"Labrador"</span>,
-  <span class="str">"edad"</span>: 3,
-  <span class="str">"duenoId"</span>: 1
-}</div>
-        <button class="copy-btn" data-copy-target="c-mjson">📋 Copiar</button>
-      </div>
-      <p>Respuesta esperada: <strong>201</strong>, con <code class="inline">duenoId: 1</code> y <code class="inline">duenoNombre: "Juan Pérez"</code>. La relación funcionó. Si intentas con <code class="inline">"duenoId": 999</code>, falla — esa es la validación de negocio protegiendo el sistema.</p>
-
-      <h3 class="sub-title">🐛 Errores comunes</h3>
-      <table class="error-table">
-        <thead><tr><th>Error</th><th>Qué significa</th><th>Solución</th></tr></thead>
-        <tbody>
-          <tr><td>Falla al crear con <code class="inline">duenoId</code> válido</td><td>Quizás se borró al dueño antes</td><td>Vuelve a crearlo y confirma su id con <code class="inline">GET /api/duenos</code></td></tr>
-          <tr><td><code class="inline">NullPointerException</code> al listar mascotas</td><td>Una mascota quedó sin dueño en la base</td><td>Revisa que toda mascota tenga un <code class="inline">duenoId</code> existente</td></tr>
-          <tr><td><code class="inline">400</code> "especie es obligatoria"</td><td>Falta un campo <code class="inline">@NotBlank</code></td><td>Completa todos los campos obligatorios del JSON</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- ============================== 8. CRUD VETERINARIO ============================== -->
-    <section class="section" id="s8" data-title="CRUD de Veterinario" data-icon="👨‍⚕️">
-      <div class="eyebrow">Tercera entidad · independiente</div>
-      <h1 class="section-title"><span class="icon">👨‍⚕️</span>CRUD de Veterinario</h1>
-      <p class="section-sub">Necesitamos veterinarios antes de las citas: una cita la atiende un veterinario. Es una entidad independiente, como Dueño — mismo patrón, repaso rápido.</p>
-
-      <div class="grid-2">
-        <div class="code-wrap">
-          <div class="code-file">📄 dto/VeterinarioRequest.java</div>
-          <div class="code-block" data-code-id="c-vreq"><span class="kw">public record</span> <span class="cls">VeterinarioRequest</span>(
-        <span class="an">@NotBlank</span>(message = <span class="str">"El nombre es obligatorio"</span>)
-        String nombre,
-
-        String especialidad,
-
-        <span class="an">@NotBlank</span>(message = <span class="str">"La tarjeta profesional es obligatoria"</span>)
-        String tarjetaProfesional
-) {}</div>
-          <button class="copy-btn" data-copy-target="c-vreq">📋 Copiar</button>
-        </div>
-        <div class="code-wrap">
-          <div class="code-file">📄 dto/VeterinarioResponse.java</div>
-          <div class="code-block" data-code-id="c-vres"><span class="kw">public record</span> <span class="cls">VeterinarioResponse</span>(
-        Long id,
-        String nombre,
-        String especialidad,
-        String tarjetaProfesional
-) {}</div>
-          <button class="copy-btn" data-copy-target="c-vres">📋 Copiar</button>
-        </div>
-      </div>
-
-      <div class="code-wrap">
-        <div class="code-file">📄 service/impl/VeterinarioServiceImpl.java</div>
-        <div class="code-block" data-code-id="c-vimpl"><span class="an">@Service</span>
-<span class="kw">public class</span> <span class="cls">VeterinarioServiceImpl</span> <span class="kw">implements</span> VeterinarioService {
-
-    <span class="kw">private final</span> VeterinarioRepository veterinarioRepository;
-
-    <span class="kw">public</span> VeterinarioServiceImpl(VeterinarioRepository veterinarioRepository) {
-        <span class="kw">this</span>.veterinarioRepository = veterinarioRepository;
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> List&lt;VeterinarioResponse&gt; listarTodos() {
-        <span class="kw">return</span> veterinarioRepository.findAll().stream().map(<span class="kw">this</span>::toResponse).toList();
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> VeterinarioResponse buscarPorId(Long id) {
-        Veterinario vet = veterinarioRepository.findById(id)
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe un veterinario con id "</span> + id));
-        <span class="kw">return</span> toResponse(vet);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> VeterinarioResponse crear(VeterinarioRequest request) {
-        Veterinario vet = <span class="kw">new</span> Veterinario();
-        vet.setNombre(request.nombre());
-        vet.setEspecialidad(request.especialidad());
-        vet.setTarjetaProfesional(request.tarjetaProfesional());
-
-        Veterinario guardado = veterinarioRepository.save(vet);
-        <span class="kw">return</span> toResponse(guardado);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> VeterinarioResponse actualizar(Long id, VeterinarioRequest request) {
-        Veterinario vet = veterinarioRepository.findById(id)
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe un veterinario con id "</span> + id));
-
-        vet.setNombre(request.nombre());
-        vet.setEspecialidad(request.especialidad());
-        vet.setTarjetaProfesional(request.tarjetaProfesional());
-
-        Veterinario actualizado = veterinarioRepository.save(vet);
-        <span class="kw">return</span> toResponse(actualizado);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public void</span> eliminar(Long id) {
-        <span class="kw">if</span> (!veterinarioRepository.existsById(id)) {
-            <span class="kw">throw new</span> RecursoNoEncontradoException(<span class="str">"No existe un veterinario con id "</span> + id);
+            if (jwtService.esValido(token, userDetails)) {
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth); // autenticado
+            }
         }
-        veterinarioRepository.deleteById(id);
+
+        filterChain.doFilter(request, response); // deja seguir la peticion
+    }
+}</code></pre>
+          </div>
+
+          <div class="reflexion">
+            <div class="reflexion-pregunta">Si una petición NO trae token (por ejemplo, alguien pidiendo el login), el filtro la deja pasar igual. ¿Eso no es un hueco de seguridad?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">No, y aquí está la clave: el filtro <strong>no bloquea</strong>, solo <strong>identifica si puede</strong>. La decisión de bloquear la toma después la SecurityConfig según la ruta. Si la petición era pública (como el login), pasa. Si era protegida y llegó sin autenticar, Spring la frena más adelante. Separar responsabilidades: el filtro identifica, la config autoriza.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 11 ═══════════ -->
+        <section class="seccion" id="sec-11">
+          <div class="seccion-numero">11 · CONFIGURACIÓN</div>
+          <h2>🛡️ La SecurityConfig completa</h2>
+
+          <p>Vuelves a la <code>SecurityConfig</code> (donde estaba solo el PasswordEncoder) y le agregas el cerebro: la <strong>cadena de filtros de seguridad</strong>. Aquí decides qué rutas son públicas, cuáles exigen token, que no usas sesiones, y dónde se inserta tu filtro JWT.</p>
+
+          <div class="tip">
+            <div class="tip-label">Cambio vs. tutoriales viejos</div>
+            <p>En Spring Security 6 <strong>ya no existe</strong> <code>WebSecurityConfigurerAdapter</code>. Ahora todo se configura con un <code>@Bean</code> que devuelve un <code>SecurityFilterChain</code>.</p>
+          </div>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/config/SecurityConfig.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity   // habilita @PreAuthorize (roles por metodo)
+public class SecurityConfig {
+
+    private final JwtFilter jwtFilter;
+    private final UserDetailsService userDetailsService;
+
+    public SecurityConfig(JwtFilter jwtFilter,
+                          UserDetailsService userDetailsService) {
+        this.jwtFilter = jwtFilter;
+        this.userDetailsService = userDetailsService;
     }
 
-    <span class="kw">private</span> VeterinarioResponse toResponse(Veterinario vet) {
-        <span class="kw">return new</span> VeterinarioResponse(
-                vet.getId(), vet.getNombre(), vet.getEspecialidad(), vet.getTarjetaProfesional()
-        );
-    }
-}</div>
-        <button class="copy-btn" data-copy-target="c-vimpl">📋 Copiar</button>
-      </div>
-
-      <div class="code-wrap">
-        <div class="code-file">📄 controller/VeterinarioController.java</div>
-        <div class="code-block" data-code-id="c-vctrl"><span class="an">@RestController</span>
-<span class="an">@RequestMapping</span>(<span class="str">"/api/veterinarios"</span>)
-<span class="kw">public class</span> <span class="cls">VeterinarioController</span> {
-
-    <span class="kw">private final</span> VeterinarioService veterinarioService;
-
-    <span class="kw">public</span> VeterinarioController(VeterinarioService veterinarioService) {
-        <span class="kw">this</span>.veterinarioService = veterinarioService;
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
-    <span class="an">@GetMapping</span>
-    <span class="kw">public</span> ResponseEntity&lt;List&lt;VeterinarioResponse&gt;&gt; listarTodos() {
-        <span class="kw">return</span> ResponseEntity.ok(veterinarioService.listarTodos());
+    // Provee el modo de autenticar: usa nuestro UserDetailsService + BCrypt
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
-    <span class="an">@GetMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;VeterinarioResponse&gt; buscarPorId(<span class="an">@PathVariable</span> Long id) {
-        <span class="kw">return</span> ResponseEntity.ok(veterinarioService.buscarPorId(id));
+    // El AuthenticationManager lo usa el login para verificar credenciales
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
-    <span class="an">@PostMapping</span>
-    <span class="kw">public</span> ResponseEntity&lt;VeterinarioResponse&gt; crear(<span class="an">@Valid</span> <span class="an">@RequestBody</span> VeterinarioRequest request) {
-        VeterinarioResponse creado = veterinarioService.crear(request);
-        <span class="kw">return</span> ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    // La cadena de seguridad: que se protege y que no
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -&gt; csrf.disable())
+            .authorizeHttpRequests(auth -&gt; auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -&gt; session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtFilter,
+                    UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+}</code></pre>
+          </div>
+
+          <p><strong>Qué hace cada línea clave:</strong> <code>csrf.disable()</code> porque somos API con token, no formularios con sesión. <code>permitAll()</code> en <code>/api/auth/**</code> y Swagger: públicos. <code>anyRequest().authenticated()</code>: todo lo demás exige token. <code>STATELESS</code>: sin sesiones, cada petición se identifica sola. <code>addFilterBefore</code>: tu filtro lee el token primero.</p>
+
+          <div class="reflexion">
+            <div class="reflexion-pregunta">¿Por qué las rutas de login y registro tienen que ser públicas obligatoriamente?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">Porque son la <strong>puerta de entrada</strong>. Para conseguir un token, primero hay que hacer login. Pero para hacer login se necesita poder llamar al login <strong>sin token</strong>. Si lo protegieras exigiendo token, sería el candado con la llave adentro: nadie podría entrar nunca.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 12 ═══════════ -->
+        <section class="seccion" id="sec-12">
+          <div class="seccion-numero">12 · IMPLEMENTACIÓN</div>
+          <h2>🔑 Completar el login con token real</h2>
+
+          <p>Ya existe el JwtService y toda la maquinaria. Vuelves al <code>AuthServiceImpl</code> y lo completas: verifica credenciales con el <code>AuthenticationManager</code> y, si son correctas, <strong>genera y devuelve el token</strong>.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/service/impl/AuthServiceImpl.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.service.impl;
+
+import com.devsenior.vetcare.dto.AuthResponse;
+import com.devsenior.vetcare.dto.LoginRequest;
+import com.devsenior.vetcare.dto.RegistroRequest;
+import com.devsenior.vetcare.model.Usuario;
+import com.devsenior.vetcare.repository.UsuarioRepository;
+import com.devsenior.vetcare.service.AuthService;
+import com.devsenior.vetcare.service.JwtService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class AuthServiceImpl implements AuthService {
+
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+
+    public AuthServiceImpl(UsuarioRepository usuarioRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtService jwtService,
+                           AuthenticationManager authenticationManager) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
 
-    <span class="an">@PutMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;VeterinarioResponse&gt; actualizar(
-            <span class="an">@PathVariable</span> Long id, <span class="an">@Valid</span> <span class="an">@RequestBody</span> VeterinarioRequest request) {
-        <span class="kw">return</span> ResponseEntity.ok(veterinarioService.actualizar(id, request));
-    }
-
-    <span class="an">@DeleteMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;Void&gt; eliminar(<span class="an">@PathVariable</span> Long id) {
-        veterinarioService.eliminar(id);
-        <span class="kw">return</span> ResponseEntity.noContent().build();
-    }
-}</div>
-        <button class="copy-btn" data-copy-target="c-vctrl">📋 Copiar</button>
-      </div>
-
-      <h2 class="block-title">🧪 Crear un veterinario en Swagger</h2>
-      <div class="code-wrap">
-        <div class="code-file">POST /api/veterinarios</div>
-        <div class="code-block" data-code-id="c-vjson">{
-  <span class="str">"nombre"</span>: <span class="str">"Dra. Laura Gómez"</span>,
-  <span class="str">"especialidad"</span>: <span class="str">"Cirugía"</span>,
-  <span class="str">"tarjetaProfesional"</span>: <span class="str">"TP-55521"</span>
-}</div>
-        <button class="copy-btn" data-copy-target="c-vjson">📋 Copiar</button>
-      </div>
-      <p>Guarda su <code class="inline">id</code> (será <code class="inline">1</code>): lo usamos ya en las citas.</p>
-    </section>
-
-    <!-- ============================== 9. CRUD CITA ============================== -->
-    <section class="section" id="s9" data-title="CRUD de Cita" data-icon="📅">
-      <div class="eyebrow">Cuarta entidad · doble relación</div>
-      <h1 class="section-title"><span class="icon">📅</span>CRUD de Cita: dos relaciones a la vez</h1>
-      <p class="section-sub">La Cita conecta una mascota (quién se atiende) y un veterinario (quién atiende): dos relaciones <code class="inline">@ManyToOne</code> al mismo tiempo.</p>
-
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>Para agendar una cita, ¿qué dos cosas mínimas hay que referenciar, además de la fecha y el motivo?</div>
-        <button class="reveal-btn" data-reveal="q9">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q9">La <strong>mascota</strong> que se atiende y el <strong>veterinario</strong> que la atenderá. Sin esos dos, la cita no tiene sentido de negocio. Por eso el Request de Cita lleva <code class="inline">mascotaId</code> y <code class="inline">veterinarioId</code>, y el service valida que ambos existan antes de agendar.</div>
-      </div>
-
-      <!-- SVG doble relación -->
-      <svg class="flow-diagram" viewBox="0 0 760 170" xmlns="http://www.w3.org/2000/svg">
-        <rect x="20" y="20" width="170" height="50" rx="10" fill="#1D1730" stroke="#63C9E8" stroke-width="1.5"/>
-        <text x="105" y="50" text-anchor="middle" fill="#F3F0FA" font-size="13" font-weight="700">🐶 Mascota</text>
-
-        <rect x="20" y="100" width="170" height="50" rx="10" fill="#1D1730" stroke="#F5C26B" stroke-width="1.5"/>
-        <text x="105" y="130" text-anchor="middle" fill="#F3F0FA" font-size="13" font-weight="700">👨‍⚕️ Veterinario</text>
-
-        <path d="M190 45 L 320 78" stroke="#63C9E8" stroke-width="2" marker-end="url(#arrow3)"/>
-        <path d="M190 125 L 320 92" stroke="#F5C26B" stroke-width="2" marker-end="url(#arrow4)"/>
-
-        <rect x="325" y="55" width="180" height="55" rx="10" fill="#1D1730" stroke="#6018F0" stroke-width="1.5"/>
-        <text x="415" y="78" text-anchor="middle" fill="#F3F0FA" font-size="13" font-weight="700">📅 Cita</text>
-        <text x="415" y="96" text-anchor="middle" fill="#B3A7CF" class="mono" font-size="9.5">mascotaId + veterinarioId</text>
-
-        <path d="M505 82 L 600 82" stroke="#34D399" stroke-width="2" marker-end="url(#arrow5)"/>
-        <rect x="600" y="55" width="140" height="55" rx="10" fill="#1D1730" stroke="#34D399" stroke-width="1.5"/>
-        <text x="670" y="79" text-anchor="middle" fill="#F3F0FA" font-size="12.5" font-weight="700">201 Created</text>
-        <text x="670" y="96" text-anchor="middle" fill="#34D399" class="mono" font-size="9.5">respuesta plana</text>
-
-        <defs>
-          <marker id="arrow3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#63C9E8"/></marker>
-          <marker id="arrow4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#F5C26B"/></marker>
-          <marker id="arrow5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#34D399"/></marker>
-        </defs>
-      </svg>
-
-      <h2 class="block-title">📦 DTOs de Cita</h2>
-      <div class="grid-2">
-        <div class="code-wrap">
-          <div class="code-file">📄 dto/CitaRequest.java</div>
-          <div class="code-block" data-code-id="c-citareq"><span class="kw">package</span> com.devsenior.vetcare.dto;
-
-<span class="kw">import</span> jakarta.validation.constraints.NotBlank;
-<span class="kw">import</span> jakarta.validation.constraints.NotNull;
-<span class="kw">import</span> java.time.LocalDate;
-
-<span class="kw">public record</span> <span class="cls">CitaRequest</span>(
-        <span class="an">@NotNull</span>(message = <span class="str">"La fecha es obligatoria"</span>)
-        LocalDate fecha,
-
-        <span class="an">@NotBlank</span>(message = <span class="str">"El motivo es obligatorio"</span>)
-        String motivo,
-
-        String estado,
-        Double costo,
-
-        <span class="an">@NotNull</span>(message = <span class="str">"El id de la mascota es obligatorio"</span>)
-        Long mascotaId,
-
-        <span class="an">@NotNull</span>(message = <span class="str">"El id del veterinario es obligatorio"</span>)
-        Long veterinarioId
-) {}</div>
-          <button class="copy-btn" data-copy-target="c-citareq">📋 Copiar</button>
-        </div>
-
-        <div class="code-wrap">
-          <div class="code-file">📄 dto/CitaResponse.java</div>
-          <div class="code-block" data-code-id="c-citares"><span class="kw">package</span> com.devsenior.vetcare.dto;
-
-<span class="kw">import</span> java.time.LocalDate;
-
-<span class="kw">public record</span> <span class="cls">CitaResponse</span>(
-        Long id,
-        LocalDate fecha,
-        String motivo,
-        String estado,
-        Double costo,
-        Long mascotaId,
-        String mascotaNombre,
-        Long veterinarioId,
-        String veterinarioNombre
-) {}</div>
-          <button class="copy-btn" data-copy-target="c-citares">📋 Copiar</button>
-        </div>
-      </div>
-
-      <h2 class="block-title">🧩 Service: valida dos existencias</h2>
-      <p>Usa tres repositorios: Cita (guardar), Mascota y Veterinario (verificar). Solo si <strong>las dos</strong> existen, agenda la cita.</p>
-
-      <div class="code-wrap">
-        <div class="code-file">📄 service/impl/CitaServiceImpl.java</div>
-        <div class="code-block" data-code-id="c-citaimpl"><span class="an">@Service</span>
-<span class="kw">public class</span> <span class="cls">CitaServiceImpl</span> <span class="kw">implements</span> CitaService {
-
-    <span class="kw">private final</span> CitaRepository citaRepository;
-    <span class="kw">private final</span> MascotaRepository mascotaRepository;
-    <span class="kw">private final</span> VeterinarioRepository veterinarioRepository;
-
-    <span class="kw">public</span> CitaServiceImpl(CitaRepository citaRepository,
-                           MascotaRepository mascotaRepository,
-                           VeterinarioRepository veterinarioRepository) {
-        <span class="kw">this</span>.citaRepository = citaRepository;
-        <span class="kw">this</span>.mascotaRepository = mascotaRepository;
-        <span class="kw">this</span>.veterinarioRepository = veterinarioRepository;
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> List&lt;CitaResponse&gt; listarTodos() {
-        <span class="kw">return</span> citaRepository.findAll().stream().map(<span class="kw">this</span>::toResponse).toList();
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> CitaResponse buscarPorId(Long id) {
-        Cita cita = citaRepository.findById(id)
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe una cita con id "</span> + id));
-        <span class="kw">return</span> toResponse(cita);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> CitaResponse crear(CitaRequest request) {
-        Mascota mascota = mascotaRepository.findById(request.mascotaId())
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe una mascota con id "</span> + request.mascotaId()));
-
-        Veterinario veterinario = veterinarioRepository.findById(request.veterinarioId())
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe un veterinario con id "</span> + request.veterinarioId()));
-
-        Cita cita = <span class="kw">new</span> Cita();
-        cita.setFecha(request.fecha());
-        cita.setMotivo(request.motivo());
-        cita.setEstado(request.estado());
-        cita.setCosto(request.costo());
-        cita.setMascota(mascota);
-        cita.setVeterinario(veterinario);
-
-        Cita guardada = citaRepository.save(cita);
-        <span class="kw">return</span> toResponse(guardada);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public</span> CitaResponse actualizar(Long id, CitaRequest request) {
-        Cita cita = citaRepository.findById(id)
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe una cita con id "</span> + id));
-
-        Mascota mascota = mascotaRepository.findById(request.mascotaId())
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe una mascota con id "</span> + request.mascotaId()));
-
-        Veterinario veterinario = veterinarioRepository.findById(request.veterinarioId())
-                .orElseThrow(() -&gt; <span class="kw">new</span> RecursoNoEncontradoException(
-                        <span class="str">"No existe un veterinario con id "</span> + request.veterinarioId()));
-
-        cita.setFecha(request.fecha());
-        cita.setMotivo(request.motivo());
-        cita.setEstado(request.estado());
-        cita.setCosto(request.costo());
-        cita.setMascota(mascota);
-        cita.setVeterinario(veterinario);
-
-        Cita actualizada = citaRepository.save(cita);
-        <span class="kw">return</span> toResponse(actualizada);
-    }
-
-    <span class="an">@Override</span>
-    <span class="kw">public void</span> eliminar(Long id) {
-        <span class="kw">if</span> (!citaRepository.existsById(id)) {
-            <span class="kw">throw new</span> RecursoNoEncontradoException(<span class="str">"No existe una cita con id "</span> + id);
+    @Override
+    public AuthResponse registrar(RegistroRequest request) {
+        if (usuarioRepository.findByUsername(request.username()).isPresent()) {
+            throw new RuntimeException("El username ya esta registrado");
         }
-        citaRepository.deleteById(id);
+
+        Usuario usuario = new Usuario();
+        usuario.setUsername(request.username());
+        usuario.setPassword(passwordEncoder.encode(request.password()));
+        usuario.setRol(request.rol());
+        usuarioRepository.save(usuario);
+
+        UserDetails userDetails = new User(usuario.getUsername(), usuario.getPassword(), List.of());
+        String token = jwtService.generarToken(userDetails, usuario.getRol().name());
+        return new AuthResponse(token);
     }
 
-    <span class="cm">// --- Conversión a DTO de respuesta ---</span>
-    <span class="kw">private</span> CitaResponse toResponse(Cita cita) {
-        Mascota mascota = cita.getMascota();
-        Veterinario vet = cita.getVeterinario();
-        <span class="kw">return new</span> CitaResponse(
-                cita.getId(), cita.getFecha(), cita.getMotivo(), cita.getEstado(), cita.getCosto(),
-                mascota.getId(), mascota.getNombre(),
-                vet.getId(), vet.getNombre()
-        );
+    @Override
+    public AuthResponse login(LoginRequest request) {
+        // 1. Verifica username + password (lanza excepcion si son incorrectos)
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.username(), request.password()));
+
+        // 2. Si paso, busca el usuario para leer su rol
+        Usuario usuario = usuarioRepository.findByUsername(request.username())
+                .orElseThrow(() -&gt; new RuntimeException("Usuario no encontrado"));
+
+        // 3. Genera el token con su rol
+        UserDetails userDetails = new User(usuario.getUsername(), usuario.getPassword(), List.of());
+        String token = jwtService.generarToken(userDetails, usuario.getRol().name());
+        return new AuthResponse(token);
     }
-}</div>
-        <button class="copy-btn" data-copy-target="c-citaimpl">📋 Copiar</button>
-      </div>
+}</code></pre>
+          </div>
 
-      <div class="question-block">
-        <div class="question-text"><span class="qmark">💭</span>El service de Cita repite el mismo patrón que el de Mascota, pero validando dos relaciones en vez de una. ¿Por qué es buena señal?</div>
-        <button class="reveal-btn" data-reveal="q10">Ver respuesta ⌄</button>
-        <div class="reveal-answer" id="q10">Porque significa que hay un <strong>patrón consistente</strong>: cada entidad con relaciones valida que sus referencias existan antes de guardar. La consistencia hace el código predecible y fácil de mantener. Quien entiende una entidad, ya entiende todas.</div>
-      </div>
+          <p>Y el controlador, con los dos endpoints públicos:</p>
 
-      <h2 class="block-title">🌐 Controller de Cita</h2>
-      <div class="code-wrap">
-        <div class="code-file">📄 controller/CitaController.java</div>
-        <div class="code-block" data-code-id="c-citactrl"><span class="an">@RestController</span>
-<span class="an">@RequestMapping</span>(<span class="str">"/api/citas"</span>)
-<span class="kw">public class</span> <span class="cls">CitaController</span> {
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/controller/AuthController.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.controller;
 
-    <span class="kw">private final</span> CitaService citaService;
+import com.devsenior.vetcare.dto.AuthResponse;
+import com.devsenior.vetcare.dto.LoginRequest;
+import com.devsenior.vetcare.dto.RegistroRequest;
+import com.devsenior.vetcare.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-    <span class="kw">public</span> CitaController(CitaService citaService) {
-        <span class="kw">this</span>.citaService = citaService;
-    }
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
 
-    <span class="an">@GetMapping</span>
-    <span class="kw">public</span> ResponseEntity&lt;List&lt;CitaResponse&gt;&gt; listarTodos() {
-        <span class="kw">return</span> ResponseEntity.ok(citaService.listarTodos());
-    }
+    private final AuthService authService;
 
-    <span class="an">@GetMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;CitaResponse&gt; buscarPorId(<span class="an">@PathVariable</span> Long id) {
-        <span class="kw">return</span> ResponseEntity.ok(citaService.buscarPorId(id));
-    }
-
-    <span class="an">@PostMapping</span>
-    <span class="kw">public</span> ResponseEntity&lt;CitaResponse&gt; crear(<span class="an">@Valid</span> <span class="an">@RequestBody</span> CitaRequest request) {
-        CitaResponse creada = citaService.crear(request);
-        <span class="kw">return</span> ResponseEntity.status(HttpStatus.CREATED).body(creada);
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
-    <span class="an">@PutMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;CitaResponse&gt; actualizar(
-            <span class="an">@PathVariable</span> Long id, <span class="an">@Valid</span> <span class="an">@RequestBody</span> CitaRequest request) {
-        <span class="kw">return</span> ResponseEntity.ok(citaService.actualizar(id, request));
+    @PostMapping("/registro")
+    public ResponseEntity&lt;AuthResponse&gt; registrar(
+            @Valid @RequestBody RegistroRequest request) {
+        return ResponseEntity.ok(authService.registrar(request));
     }
 
-    <span class="an">@DeleteMapping</span>(<span class="str">"/{id}"</span>)
-    <span class="kw">public</span> ResponseEntity&lt;Void&gt; eliminar(<span class="an">@PathVariable</span> Long id) {
-        citaService.eliminar(id);
-        <span class="kw">return</span> ResponseEntity.noContent().build();
+    @PostMapping("/login")
+    public ResponseEntity&lt;AuthResponse&gt; login(
+            @Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
-}</div>
-        <button class="copy-btn" data-copy-target="c-citactrl">📋 Copiar</button>
+}</code></pre>
+          </div>
+
+          <div class="reflexion">
+            <div class="reflexion-pregunta">En el login, ¿por qué usamos authenticationManager.authenticate(...) en vez de comparar nosotros mismos la contraseña con un if?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">Porque el AuthenticationManager hace la comparación <strong>correctamente y de forma segura</strong>: toma la clave escrita, la tritura con BCrypt y la compara con la de la base. Si lo hicieras a mano, es fácil equivocarse (comparar texto plano, filtrar información). Delegas en la herramienta probada del framework: no reinventes la seguridad.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 13 ═══════════ -->
+        <section class="seccion" id="sec-13">
+          <div class="seccion-numero">13 · PRÁCTICA</div>
+          <h2>🧪 Probar el flujo completo en Swagger</h2>
+
+          <p>Momento de la verdad. Vas a ver: que todo esté cerrado, registrar un usuario, hacer login y recibir el token, y usar el token para entrar.</p>
+
+          <p><strong>1.</strong> Reinicia (<code>./mvnw spring-boot:run</code>) y abre <code>http://localhost:8080/swagger-ui.html</code></p>
+
+          <p><strong>2. Comprobar que está cerrado.</strong> Intenta <code>GET /api/duenos</code> sin token. Ahora responde <strong>401</strong> o <strong>403</strong>. ¡La puerta está cerrada! Antes esto devolvía la lista.</p>
+
+          <p><strong>3. Registrar un admin.</strong> En <code>POST /api/auth/registro</code>:</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">body de POST /api/auth/registro</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>{
+  "username": "laura",
+  "password": "clave123",
+  "rol": "ADMIN"
+}</code></pre>
+          </div>
+
+          <p><strong>4. Login.</strong> En <code>POST /api/auth/login</code> con el mismo username y password. Recibes un <strong>token</strong> largo.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">body de POST /api/auth/login</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>{
+  "username": "laura",
+  "password": "clave123"
+}</code></pre>
+          </div>
+
+          <p><strong>5. Ver el token por dentro (opcional).</strong> Copia el token y pégalo en <strong>jwt.io</strong>. Verás el payload con <code>"sub": "laura"</code> y <code>"rol": "ADMIN"</code>. Legible, pero firmado: no se puede falsificar.</p>
+
+          <div class="tip">
+            <div class="tip-label">Si algo falla</div>
+            <p>¿WeakKeyException al arrancar? La clave secreta es muy corta, usa 32+ caracteres. ¿Login da 403 con datos correctos? Revisa que el registro use <code>passwordEncoder.encode(...)</code>.</p>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 14 ═══════════ -->
+        <section class="seccion" id="sec-14">
+          <div class="seccion-numero">14 · AUTORIZACIÓN</div>
+          <h2>👮 Roles en acción: que USER no pueda borrar</h2>
+
+          <p>Hasta ahora, cualquier usuario <strong>autenticado</strong> puede hacer todo. Pero eso no es realista: una recepcionista (USER) debería consultar y crear, pero <strong>no borrar</strong>. Borrar es cosa del <strong>ADMIN</strong>.</p>
+
+          <div class="definicion">
+            <p class="tecnica"><strong>@PreAuthorize:</strong> anotación que protege un método concreto según una condición de seguridad. <code>@PreAuthorize("hasRole('ADMIN')")</code> significa "solo un ADMIN puede ejecutar este método".</p>
+            <p class="real">Es el letrero de "solo personal autorizado" en una puerta: no importa que ya estés dentro del edificio, esa sala en particular tiene su propia restricción.</p>
+          </div>
+
+          <div class="tip">
+            <div class="tip-label">Regla de negocio de VetCare</div>
+            <p><strong>USER consulta y crea. ADMIN además actualiza y borra.</strong> Memorízala.</p>
+          </div>
+
+          <p>Primero configura Swagger para que muestre el botón <strong>Authorize</strong> (el candadito), y así pueda mandar el token.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/config/SwaggerConfig.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.config;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@OpenAPIDefinition(security = { @SecurityRequirement(name = "bearerAuth") })
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+}</code></pre>
+          </div>
+
+          <p>Ahora agrega <code>@PreAuthorize</code> en el <code>DuenoController</code>, solo en los métodos que <strong>modifican</strong>. Consultar (GET) queda libre para cualquier autenticado.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">DuenoController.java · nuevo import + anotaciones</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>import org.springframework.security.access.prepost.PreAuthorize;
+
+// ...
+
+@PreAuthorize("hasRole('ADMIN')")
+@PostMapping
+public ResponseEntity&lt;DuenoResponse&gt; crear(@Valid @RequestBody DuenoRequest request) {
+    DuenoResponse creado = duenoService.crear(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+}
+
+@PreAuthorize("hasRole('ADMIN')")
+@PutMapping("/{id}")
+public ResponseEntity&lt;DuenoResponse&gt; actualizar(
+        @PathVariable Long id,
+        @Valid @RequestBody DuenoRequest request) {
+    return ResponseEntity.ok(duenoService.actualizar(id, request));
+}
+
+@PreAuthorize("hasRole('ADMIN')")
+@DeleteMapping("/{id}")
+public ResponseEntity&lt;Void&gt; eliminar(@PathVariable Long id) {
+    duenoService.eliminar(id);
+    return ResponseEntity.noContent().build();
+}</code></pre>
+          </div>
+
+          <p><strong>A probar la regla.</strong> Registra un USER (pedro), entra con su token y ponlo en <strong>Authorize</strong>. Intenta <code>DELETE /api/duenos/1</code> → <strong>403 Forbidden</strong>. El USER está autenticado, pero no autorizado a borrar. Consultar sí funciona. Cambia al token de laura (ADMIN) y el DELETE ahora da <strong>204</strong>.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">registrar un USER para la prueba</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>{
+  "username": "pedro",
+  "password": "clave123",
+  "rol": "USER"
+}</code></pre>
+          </div>
+
+          <div class="reflexion">
+            <div class="reflexion-pregunta">¿Por qué en una clínica real no querríamos que cualquier empleado con acceso pueda borrar registros de citas o dueños?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">Porque borrar es una acción <strong>destructiva e irreversible</strong>: se pierde el historial. Se limita a quien tiene la <strong>responsabilidad</strong> (el admin), para que un error, un descuido o una cuenta comprometida no destruyan datos. Es el principio de <strong>mínimo privilegio</strong>: cada quien solo puede hacer lo que su rol necesita.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 15 ═══════════ -->
+        <section class="seccion" id="sec-15">
+          <div class="seccion-numero">15 · CIERRE PRO</div>
+          <h2>🧹 Errores limpios: el 404 con @ControllerAdvice</h2>
+
+          <p>¿Recuerdas que al buscar un id inexistente salía un feo <strong>error 500</strong>? Hoy lo conviertes en un <strong>404</strong> elegante. Y de paso manejas los errores de seguridad (403) y de validación (400).</p>
+
+          <div class="definicion">
+            <p class="tecnica"><strong>@ControllerAdvice / @RestControllerAdvice:</strong> una clase que atrapa las excepciones de toda la API en un solo lugar y las convierte en respuestas limpias, en vez de manejar errores en cada controlador.</p>
+            <p class="real">Es como el área de reclamos central de una empresa: en vez de que cada mostrador improvise su respuesta, todos los problemas llegan a un mismo lugar que responde de forma consistente.</p>
+          </div>
+
+          <p>Primero un DTO simple para el error:</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/dto/ErrorResponse.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.dto;
+
+import java.time.LocalDateTime;
+
+public record ErrorResponse(
+        int codigo,
+        String mensaje,
+        LocalDateTime fecha
+) {}</code></pre>
+          </div>
+
+          <p>Y el manejador global. Cada <code>@ExceptionHandler</code> atrapa un tipo de error y devuelve la respuesta adecuada:</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">src/main/java/com/devsenior/vetcare/exception/ManejadorGlobalExcepciones.java</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>package com.devsenior.vetcare.exception;
+
+import com.devsenior.vetcare.dto.ErrorResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+
+@RestControllerAdvice
+public class ManejadorGlobalExcepciones {
+
+    // 404: recurso no encontrado
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; noEncontrado(RecursoNoEncontradoException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    // 403: sin permiso (USER intentando borrar)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; accesoDenegado(AccessDeniedException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "No tienes permiso para realizar esta accion",
+                LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    // 400: fallo una validacion de @Valid
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; validacion(MethodArgumentNotValidException ex) {
+        String mensaje = ex.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(e -&gt; e.getField() + ": " + e.getDefaultMessage())
+                .orElse("Error de validacion");
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                mensaje,
+                LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+}</code></pre>
+          </div>
+
+          <p>Ahora <code>GET /api/duenos/999</code> (id que no existe) devuelve un <strong>404 limpio</strong> en vez del feo 500:</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-file">respuesta 404</span>
+              <button class="copy-btn">Copiar</button>
+            </div>
+            <pre><code>{
+  "codigo": 404,
+  "mensaje": "No existe un dueño con id 999",
+  "fecha": "2026-07-09T10:30:00"
+}</code></pre>
+          </div>
+
+          <div class="reflexion">
+            <div class="reflexion-pregunta">¿Por qué es mejor tener los errores centralizados en UNA clase en vez de un try/catch en cada método de cada controlador?</div>
+            <span class="ver-explicacion">▸ Ver explicación</span>
+            <div class="explicacion">
+              <div class="explicacion-inner">Por dos razones. <strong>Consistencia:</strong> todos los "no encontrado" de toda la API responden igual. <strong>Mantenimiento:</strong> si mañana cambias el formato del error, lo cambias en un solo lugar y aplica a todo. Con try/catch repartidos tendrías que tocar decenas de métodos. Centralizar es la buena práctica (principio DRY: no te repitas).</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ SECCIÓN 16 · RETO ═══════════ -->
+        <section class="seccion" id="sec-16">
+          <div class="seccion-numero">16 · RETO</div>
+          <h2>🚀 Lleva la seguridad más lejos</h2>
+
+          <p>Ya blindaste Dueño. El reto es replicar y extender lo aprendido:</p>
+
+          <div class="card">
+            <p><strong>1.</strong> Aplica <code>@PreAuthorize("hasRole('ADMIN')")</code> también a los métodos de crear, actualizar y eliminar de <strong>Mascota</strong>, <strong>Veterinario</strong> y <strong>Cita</strong>, replicando lo que hicimos con Dueño.</p>
+            <p><strong>2.</strong> Extra: haz que <strong>solo un ADMIN</strong> pueda registrar nuevos usuarios con rol ADMIN. Pista: valida el rol dentro del <code>AuthService</code> antes de guardar.</p>
+          </div>
+
+          <div class="tip">
+            <div class="tip-label">Si lo logras</div>
+            <p>Ya estás diseñando seguridad como un profesional: no solo sabes hacer login, sabes decidir quién puede hacer qué en todo el sistema.</p>
+          </div>
+
+          <div class="card">
+            <p><strong>Lo que dominaste hoy:</strong> autenticación (quién eres) · autorización (qué puedes hacer) · BCrypt (contraseñas irreversibles) · JWT (llave firmada) · el filtro que identifica en cada petición · @PreAuthorize (blindar por rol) · @ControllerAdvice (errores limpios y consistentes).</p>
+          </div>
+
+          <p style="color: var(--text-dim); font-size: 14px;">La próxima clase es el cierre del programa: validaciones finales, documentación de la API y la entrega profesional en GitHub para tu portafolio. VetCare pasa de "proyecto de clase" a "proyecto presentable en una entrevista".</p>
+        </section>
+
+        <!-- FIN HUECO 4 -->
+
+        <!-- PIE DE PÁGINA (fijo) -->
+        <footer class="footer">
+          © 2026 Ana Alvarado · Educadora Tech &amp; Desarrolladora Full Stack · Todos los derechos reservados · linkedin.com/in/ana-alvarado-instructora-full-stack
+        </footer>
+
       </div>
+    </main>
+  </div>
 
-      <h2 class="block-title">🧪 La prueba final: agendar una cita completa</h2>
-      <p>Conectamos a Firulais (mascota <code class="inline">id=1</code>) con la Dra. Laura (veterinario <code class="inline">id=1</code>).</p>
+  <!-- MARCA DE AGUA FIJA -->
+  <div class="watermark">© 2026 Ana Alvarado</div>
 
-      <div class="code-wrap">
-        <div class="code-file">POST /api/citas</div>
-        <div class="code-block" data-code-id="c-citajson">{
-  <span class="str">"fecha"</span>: <span class="str">"2026-07-15"</span>,
-  <span class="str">"motivo"</span>: <span class="str">"Vacunación anual"</span>,
-  <span class="str">"estado"</span>: <span class="str">"PENDIENTE"</span>,
-  <span class="str">"costo"</span>: 85000,
-  <span class="str">"mascotaId"</span>: 1,
-  <span class="str">"veterinarioId"</span>: 1
-}</div>
-        <button class="copy-btn" data-copy-target="c-citajson">📋 Copiar</button>
-      </div>
+  <!-- HINT MODO PRESENTACIÓN -->
+  <div class="slide-hint">← → para navegar · Esc para salir</div>
 
-      <div class="tip-banner">
-        <span class="emoji">🎉</span>
-        <p>Respuesta esperada: <strong>201</strong>, con <code class="inline">mascotaNombre: "Firulais"</code> y <code class="inline">veterinarioNombre: "Dra. Laura Gómez"</code>. El sistema completo funciona de punta a punta: Dueño → Mascota → Cita → Veterinario, todos conectados.</p>
-      </div>
+  <script>
+  /* ══════════════════════════════════════════════════════════════════════
+     SCRIPT FIJO — no se regenera entre clases.
+     Toggle tema con memoria · navegación · presentación · copiar · consola.
+     ══════════════════════════════════════════════════════════════════════ */
 
-      <h3 class="sub-title">🐛 Errores comunes</h3>
-      <table class="error-table">
-        <thead><tr><th>Error</th><th>Qué significa</th><th>Solución</th></tr></thead>
-        <tbody>
-          <tr><td>Falla por <code class="inline">mascotaId</code></td><td>No hay mascota con ese id</td><td>Crea la mascota primero y confirma su id</td></tr>
-          <tr><td>Falla por <code class="inline">veterinarioId</code></td><td>No hay veterinario con ese id</td><td>Crea el veterinario antes de agendar</td></tr>
-          <tr><td>Error de formato en fecha</td><td>No se envió como <code class="inline">yyyy-MM-dd</code></td><td>Usa exactamente <code class="inline">"2026-07-15"</code></td></tr>
-          <tr><td>Error de tipo en <code class="inline">costo</code></td><td>Se envió entre comillas como texto</td><td>Envíalo como número: <code class="inline">85000</code>, sin comillas</td></tr>
-        </tbody>
-      </table>
-    </section>
+  /* ── Mensajes de consola (protección de autoría) ── */
+  console.log('%c© 2026 Ana Alvarado', 'color:#A88CFF;font-weight:bold;font-size:16px');
+  console.log('Educadora Tech & Desarrolladora Full Stack — Todos los derechos reservados.');
+  console.log('Este material es de autoría exclusiva. Prohibida su reproducción o redistribución sin autorización.');
 
-    <!-- ============================== 10. CIERRE ============================== -->
-    <section class="section" id="s10" data-title="Cierre y FAQ" data-icon="🏁">
-      <div class="eyebrow">Resumen final</div>
-      <h1 class="section-title"><span class="icon">🏁</span>Lo que construimos hoy</h1>
-      <p class="section-sub">Las 4 entidades del sistema VetCare quedaron funcionales de extremo a extremo, con un contrato de datos limpio y documentación interactiva.</p>
-
-      <div class="grid-2">
-        <div class="card"><div class="card-title">✅ Swagger UI</div><p style="margin:0;">Integrado, documentando toda la API sola.</p></div>
-        <div class="card"><div class="card-title">✅ DTOs con record</div><p style="margin:0;">Request y Response para cada entidad, con validaciones.</p></div>
-        <div class="card"><div class="card-title">✅ CRUD completo</div><p style="margin:0;">5 operaciones para Dueño, Mascota, Veterinario y Cita.</p></div>
-        <div class="card"><div class="card-title">✅ Relaciones al recibir datos</div><p style="margin:0;">1 relación en Mascota, 2 relaciones en Cita.</p></div>
-      </div>
-
-      <h2 class="block-title">🧠 Grandes conceptos de hoy</h2>
-      <div class="concept-item"><div class="cbadge">record</div><p style="margin:0;">Escribir DTOs cortos e inmutables sin código repetitivo.</p></div>
-      <div class="concept-item"><div class="cbadge">DTO</div><p style="margin:0;">Separar lo que viaja por la API de lo que se persiste.</p></div>
-      <div class="concept-item"><div class="cbadge">Ref. por id</div><p style="margin:0;">Relacionar entidades sin repetir datos.</p></div>
-      <div class="concept-item"><div class="cbadge">Validación</div><p style="margin:0;">Proteger la integridad: nunca crear registros huérfanos.</p></div>
-      <div class="concept-item"><div class="cbadge">Swagger</div><p style="margin:0;">Probar y documentar la API sin herramientas externas.</p></div>
-
-      <div class="tip-banner">
-        <span class="emoji">🌉</span>
-        <p><strong>Puente a la Clase 3:</strong> le ponemos seguridad JWT al sistema — login, generación de token, protección de endpoints y roles (ADMIN/USER). Además convertimos <code class="inline">RecursoNoEncontradoException</code> en un 404 limpio y global con <code class="inline">@ControllerAdvice</code>. Hoy la clínica está abierta a todos; mañana solo entra quien tenga la llave.</p>
-      </div>
-
-      <div class="copyright-card">
-        <div class="ttl">📝 Reto para la casa (opcional)</div>
-        <p>Agrega al <code class="inline">DuenoResponse</code> un campo <code class="inline">cantidadMascotas</code> que muestre cuántas mascotas tiene registradas ese dueño. Pista: en el <code class="inline">toResponse</code> del <code class="inline">DuenoServiceImpl</code> puedes calcularlo con <code class="inline">dueno.getMascotas().size()</code>.</p>
-      </div>
-
-      <h2 class="block-title">❓ Preguntas frecuentes</h2>
-
-      <div class="faq-item">
-        <div class="faq-q">🔹 ¿Por qué usamos <code class="inline">record</code> para los DTOs y no para las entidades?</div>
-        <div class="faq-a">El <code class="inline">record</code> es inmutable y no tiene constructor vacío; JPA necesita ambas cosas para manejar la entidad. Por eso: entidad → clase con Lombok; DTO → record.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">🔹 ¿Por qué la conversión DTO ↔ entidad va dentro del ServiceImpl y no en una clase aparte?</div>
-        <div class="faq-a">Convertir es parte del trabajo del servicio, así se mantiene la arquitectura de 4 capas sin agregar carpetas nuevas. Los métodos <code class="inline">toEntity</code>/<code class="inline">toResponse</code> son privados: solo los usa ese servicio.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">🔹 Si borro un dueño que tiene mascotas, ¿qué pasa?</div>
-        <div class="faq-a">Por el <code class="inline">cascade = CascadeType.ALL</code> y <code class="inline">orphanRemoval</code> definidos en la Clase 1, se borran también sus mascotas (y por cascada, sus citas). Ese es el comportamiento definido para VetCare.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">🔹 ¿Por qué al buscar un id inexistente sale error 500 y no 404?</div>
-        <div class="faq-a">Porque todavía no existe el manejador global. Hoy se lanza la excepción; en la Clase 3 se atrapa con <code class="inline">@ControllerAdvice</code> y se convierte en un 404 elegante.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">🔹 ¿El <code class="inline">id</code> en Swagger lo escribo yo?</div>
-        <div class="faq-a">No para crear — la base lo genera. Solo se escribe en las rutas con <code class="inline">{id}</code> (buscar, actualizar, eliminar), usando un id que ya exista.</div>
-      </div>
-    </section>
-
-    <footer class="site-footer">
-      © 2026 Ana Alvarado · Educadora Tech &amp; Desarrolladora Full Stack · Todos los derechos reservados ·
-      <a href="https://linkedin.com/in/ana-alvarado-instructora-full-stack" target="_blank" rel="noopener">linkedin.com/in/ana-alvarado-instructora-full-stack</a>
-    </footer>
-
-  </main>
-</div>
-
-<div class="watermark">© 2026 Ana Alvarado</div>
-
-<div class="present-hint">
-  <span><kbd>◀</kbd> <kbd>▶</kbd> navegar</span>
-  <span><kbd>Esc</kbd> salir</span>
-</div>
-
-<script>
-(function(){
-  'use strict';
-
-  // ---------- Aviso de autoría en consola ----------
-  console.log('%c© 2026 Ana Alvarado', 'color:#6018F0; font-weight:bold; font-size:16px;');
-  console.log('%cEducadora Tech & Desarrolladora Full Stack — Todos los derechos reservados.', 'color:#B3A7CF; font-size:12px;');
-  console.log('%cEste material es de autoría exclusiva. Prohibida su reproducción o redistribución sin autorización.', 'color:#B3A7CF; font-size:12px;');
-
-  // ---------- Bloqueo de clic derecho (excepto en bloques de código) ----------
-  document.addEventListener('contextmenu', function(e){
-    if (e.target.closest('.code-block')) return;
-    e.preventDefault();
+  /* ── Toggle tema claro/oscuro con memoria ── */
+  const root = document.documentElement;
+  const temaBtn = document.getElementById('temaBtn');
+  const temaGuardado = localStorage.getItem('ana-tema');
+  if (temaGuardado === 'claro') { root.setAttribute('data-tema', 'claro'); temaBtn.textContent = '🌙'; }
+  temaBtn.addEventListener('click', () => {
+    const esClaro = root.getAttribute('data-tema') === 'claro';
+    if (esClaro) { root.removeAttribute('data-tema'); temaBtn.textContent = '☀️'; localStorage.setItem('ana-tema', 'oscuro'); }
+    else { root.setAttribute('data-tema', 'claro'); temaBtn.textContent = '🌙'; localStorage.setItem('ana-tema', 'claro'); }
   });
 
-  // ---------- Generar tabla de contenidos ----------
-  var sections = Array.prototype.slice.call(document.querySelectorAll('main .section'));
-  var toc = document.getElementById('toc');
-  sections.forEach(function(sec, i){
-    var item = document.createElement('div');
-    item.className = 'toc-item';
-    item.dataset.target = sec.id;
-    item.innerHTML = '<span class="toc-icon">' + (sec.dataset.icon || '•') + '</span>' +
-                      '<span>' + sec.dataset.title + '</span>' +
-                      '<span class="toc-dot"></span>';
-    item.addEventListener('click', function(){
-      sec.scrollIntoView({behavior:'smooth', block:'start'});
-      if (window.innerWidth <= 900) closeMobileSidebar();
-    });
-    toc.appendChild(item);
-  });
-  var tocItems = Array.prototype.slice.call(toc.querySelectorAll('.toc-item'));
-
-  // ---------- Progreso: IntersectionObserver ----------
-  var seen = new Set();
-  var progressFill = document.getElementById('progressFill');
-  var progressPct = document.getElementById('progressPct');
-
-  function updateProgress(){
-    var pct = Math.round((seen.size / sections.length) * 100);
-    progressFill.style.width = pct + '%';
-    progressPct.textContent = pct + '%';
-  }
-
-  var observer = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      var idx = sections.indexOf(entry.target);
-      var tocItem = tocItems[idx];
-      if (entry.isIntersecting){
-        tocItems.forEach(function(t){ t.classList.remove('active'); });
-        tocItem.classList.add('active');
-        seen.add(entry.target.id);
-        tocItem.classList.add('seen');
-        updateProgress();
-      }
-    });
-  }, { threshold: 0.4 });
-  sections.forEach(function(s){ observer.observe(s); });
-
-  // ---------- Preguntas: revelar respuesta ----------
-  document.querySelectorAll('.reveal-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var target = document.getElementById(btn.dataset.reveal);
-      var isShown = target.classList.toggle('show');
-      btn.textContent = isShown ? 'Ocultar respuesta ⌃' : 'Ver respuesta ⌄';
+  /* ── Botones de copiar código ── */
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.code-block').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copiado';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      });
     });
   });
 
-  // ---------- Copiar código (siempre funcional, vía Clipboard API) ----------
-  document.querySelectorAll('.copy-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var block = document.querySelector('[data-code-id="' + btn.dataset.copyTarget + '"]');
-      var text = block ? block.innerText : '';
-      var done = function(){
-        var original = btn.innerHTML;
-        btn.innerHTML = '✅ Copiado';
-        btn.classList.add('copied');
-        setTimeout(function(){
-          btn.innerHTML = original;
-          btn.classList.remove('copied');
-        }, 1600);
-      };
-      if (navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(text).then(done).catch(function(){
-          fallbackCopy(text); done();
-        });
-      } else {
-        fallbackCopy(text); done();
-      }
+  /* ── Ver explicación (colapsable) ── */
+  document.querySelectorAll('.ver-explicacion').forEach(link => {
+    link.addEventListener('click', () => {
+      const exp = link.nextElementSibling;
+      const abierta = exp.classList.toggle('abierta');
+      link.innerHTML = (abierta ? '▾ Ocultar explicación' : '▸ Ver explicación');
     });
   });
 
-  function fallbackCopy(text){
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch(e){}
-    document.body.removeChild(ta);
-  }
+  /* ── Navegación: resaltar sección activa al hacer scroll ── */
+  const secciones = document.querySelectorAll('.seccion');
+  const navItems = document.querySelectorAll('.nav-item');
+  const progressBar = document.getElementById('progressBar');
 
-  // ---------- Modo mobile: sidebar toggle ----------
-  var sidebar = document.getElementById('sidebar');
-  var mobileToggle = document.getElementById('mobileToggle');
-  function closeMobileSidebar(){ sidebar.classList.remove('open'); }
-  mobileToggle.addEventListener('click', function(){ sidebar.classList.toggle('open'); });
-
-  // ---------- Modo presentación ----------
-  var presentBtn = document.getElementById('presentBtn');
-  var currentIndex = 0;
-
-  function enterPresentation(){
-    document.body.classList.add('presenting');
-    var el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen().catch(function(){});
-    currentIndex = Math.max(0, sections.findIndex(function(s){
-      var r = s.getBoundingClientRect();
-      return r.top >= -50 && r.top < window.innerHeight;
-    }));
-    goToSlide(currentIndex, false);
-  }
-
-  function exitPresentation(){
-    document.body.classList.remove('presenting');
-    if (document.fullscreenElement) document.exitFullscreen().catch(function(){});
-  }
-
-  function goToSlide(i, smooth){
-    if (i < 0 || i >= sections.length) return;
-    currentIndex = i;
-    sections[i].scrollIntoView({behavior: smooth === false ? 'auto' : 'smooth', block:'start'});
-  }
-
-  presentBtn.addEventListener('click', enterPresentation);
-
-  document.addEventListener('keydown', function(e){
-    if (!document.body.classList.contains('presenting')) return;
-    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){
-      e.preventDefault(); goToSlide(currentIndex + 1);
-    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp'){
-      e.preventDefault(); goToSlide(currentIndex - 1);
-    } else if (e.key === 'Escape'){
-      exitPresentation();
-    }
+  window.addEventListener('scroll', () => {
+    let actual = '';
+    secciones.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 80) actual = sec.id;
+    });
+    navItems.forEach(item => {
+      item.classList.toggle('active', item.getAttribute('href') === '#' + actual);
+    });
+    const h = document.body.scrollHeight - window.innerHeight;
+    progressBar.style.width = (window.scrollY / h * 100) + '%';
   });
 
-  document.addEventListener('fullscreenchange', function(){
-    if (!document.fullscreenElement && document.body.classList.contains('presenting')){
-      document.body.classList.remove('presenting');
-    }
+  /* ── Modo presentación ── */
+  const presentBtn = document.getElementById('presentBtn');
+  let slideActual = 0;
+  const slides = Array.from(secciones);
+
+  function entrarPresentacion() {
+    document.body.classList.add('presentacion');
+    slideActual = 0;
+    mostrarSlide();
+    if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+  }
+  function salirPresentacion() {
+    document.body.classList.remove('presentacion');
+    slides.forEach(s => s.classList.remove('slide-activa'));
+    if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  }
+  function mostrarSlide() {
+    slides.forEach((s, i) => s.classList.toggle('slide-activa', i === slideActual));
+    window.scrollTo(0, 0);
+  }
+  presentBtn.addEventListener('click', entrarPresentacion);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'p' && !document.body.classList.contains('presentacion')) { entrarPresentacion(); }
+    if (!document.body.classList.contains('presentacion')) return;
+    if (e.key === 'Escape') salirPresentacion();
+    if (e.key === 'ArrowRight' && slideActual < slides.length - 1) { slideActual++; mostrarSlide(); }
+    if (e.key === 'ArrowLeft' && slideActual > 0) { slideActual--; mostrarSlide(); }
   });
 
-})();
-</script>
-
+  /* ── Protección: clic derecho desactivado excepto en bloques de código ── */
+  document.addEventListener('contextmenu', (e) => {
+    if (!e.target.closest('.code-block')) e.preventDefault();
+  });
+  </script>
 </body>
 </html>
